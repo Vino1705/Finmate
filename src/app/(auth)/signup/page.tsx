@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Logo } from '@/components/logo';
+import Image from 'next/image';
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Please enter your full name'),
@@ -59,9 +59,17 @@ export default function SignupPage() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
-        <Logo className="mx-auto h-10 w-10" />
+        <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center mx-auto">
+          <img
+            src="/FINMATE.png"
+            alt="FinMate"
+            width={36}
+            height={36}
+            className="object-contain"
+          />
+        </div>
         <CardTitle className="mt-4">Create an Account</CardTitle>
-        <CardDescription>Get started with Kart-i-quo for free</CardDescription>
+        <CardDescription>Get started with FinMate for free</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
