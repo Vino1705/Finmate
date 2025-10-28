@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Trash, Wallet, PiggyBank, ShoppingCart, ShieldAlert } from 'lucide-react';
 import React from 'react';
+import MicRecorder from '@/components/mic-recorder';
 import { expenseCategories } from '@/lib/types';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
@@ -21,7 +22,6 @@ import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import Image from 'next/image';
 
 const fixedExpenseSchema = z.object({
   name: z.string().min(1, 'Expense name is required'),
@@ -41,17 +41,15 @@ type OnboardingValues = z.infer<typeof onboardingSchema>;
 
 function SummaryCard({ title, amount, icon, description }: { title: string; amount: number; icon: React.ReactNode; description: string; }) {
     return (
-        <div className="flex items-center justify-between rounded-xl bg-muted/60 p-4 hover:bg-muted/80 transition-colors">
-            <div className="flex items-center gap-4">
-                <div className="p-2 rounded-lg bg-background">
-                    {icon}
-                </div>
+        <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+            <div className="flex items-center gap-3">
+                {icon}
                 <div className="flex flex-col">
-                    <span className="text-sm font-semibold tracking-tight">{title}</span>
-                    <span className="text-xs text-muted-foreground">{description}</span>
+                  <span className="text-sm font-medium">{title}</span>
+                  <span className="text-xs text-muted-foreground">{description}</span>
                 </div>
             </div>
-            <div className="text-lg font-bold tabular-nums">₹{amount.toFixed(2)}</div>
+            <div className="text-sm font-bold">₹{amount.toFixed(2)}</div>
         </div>
     )
 }
@@ -112,29 +110,40 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="container flex items-center justify-center py-8">
-      <Card className="w-full max-w-4xl shadow-lg">
-        <CardHeader className="text-center space-y-6 pb-8">
-          <div className="mx-auto w-48 h-48 relative mb-4">
-            <div className="w-full h-full bg-[#111111] rounded-2xl flex items-center justify-center p-6">
-              <Image
-                src="/FINMATE.png"
-                alt="FinMate Logo"
-                width={200}
-                height={200}
-                className="w-full h-full object-contain drop-shadow-lg"
-                priority
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <CardTitle className="text-3xl font-bold">Welcome to FinMate!</CardTitle>
-            <CardDescription className="text-base">Let's set up your financial profile to personalize your experience.</CardDescription>
-          </div>
+    <div className="flex items-center justify-center min-h-screen p-4">
+      <Card className="w-full max-w-4xl">
+        <CardHeader>
+          <CardTitle className="text-2xl">Welcome to Kart-i-quo!</CardTitle>
+          <CardDescription>Let's set up your financial profile to tailor your experience.</CardDescription>
         </CardHeader>
-        <CardContent className="px-6">
+        <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <div className="flex justify-end">
+                <MicRecorder
+                  targetForm="onboarding"
+                  onResult={({ text, parsed }) => {
+                    if (text) {
+                      // If parsed exists and has structured fields, set them
+                      if (parsed) {
+                        if (parsed.role) form.setValue('role', parsed.role);
+                        if (parsed.income) form.setValue('income', parsed.income);
+                        if (Array.isArray(parsed.fixedExpenses)) {
+                          // replace field array
+                          form.reset({ ...form.getValues(), fixedExpenses: parsed.fixedExpenses.map((fe: any) => ({ name: fe.name || '', amount: fe.amount || 0, category: fe.category || 'Other', timelineMonths: fe.timelineMonths ?? null, startDate: fe.startDate })) });
+                        }
+                      } else {
+                        // naive parsing: try to pull numbers for income
+                        const incomeMatch = (text || '').match(/income\s*(?:is|:)?\s*([0-9,]+)/i);
+                        if (incomeMatch) {
+                          const num = Number(incomeMatch[1].replace(/,/g, ''));
+                          if (!Number.isNaN(num)) form.setValue('income', num);
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <FormField
                   control={form.control}
@@ -173,16 +182,14 @@ export default function OnboardingPage() {
                 />
               </div>
 
-                <div className="rounded-lg border p-4 space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-lg font-medium">Fixed Monthly Expenses</Label>
-                    <p className="text-sm text-muted-foreground">Enter expenses like rent, EMIs, or subscriptions. This helps us calculate your 'Needs'.</p>
-                  </div>
-                  <div className="space-y-4">
-                    {fields.map((field, index) => {
-                      const timelineMonths = form.watch(`fixedExpenses.${index}.timelineMonths`);
-                      return (
-                      <div key={field.id} className="grid grid-cols-1 md:grid-cols-[2fr,1.2fr,1fr,1fr,auto] items-end gap-4 p-4 bg-muted/50 rounded-lg border">
+              <div>
+                <Label className="text-lg font-medium">Fixed Monthly Expenses</Label>
+                <p className="text-sm text-muted-foreground mb-4">Enter expenses like rent, EMIs, or subscriptions. This helps us calculate your 'Needs'.</p>
+                <div className="space-y-4">
+                  {fields.map((field, index) => {
+                     const timelineMonths = form.watch(`fixedExpenses.${index}.timelineMonths`);
+                    return (
+                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-[2fr,1fr,1fr,1fr,auto] items-end gap-4 p-4 border rounded-lg">
                       <FormField
                         control={form.control}
                         name={`fixedExpenses.${index}.name`}
@@ -303,17 +310,12 @@ export default function OnboardingPage() {
                   </Button>
               </div>
               
-              <Card className="bg-card border-2">
-                  <CardHeader className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-1 bg-primary rounded-full" />
-                      <div>
-                        <CardTitle className="text-xl">Your Financial Breakdown</CardTitle>
-                        <CardDescription>Based on your disposable income (Income - Needs), we suggest a 60/40 split between Wants and Savings.</CardDescription>
-                      </div>
-                    </div>
+              <Card className="bg-secondary/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Your Financial Breakdown</CardTitle>
+                    <CardDescription>Based on your disposable income (Income - Needs), we suggest a 60% (Wants) and 40% (Savings) split.</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-2">
                     <SummaryCard title="Needs" amount={monthlyNeeds} icon={<Wallet className="h-5 w-5 text-primary" />} description="Your total fixed costs." />
                     <SummaryCard title="Wants" amount={monthlyWants} icon={<ShoppingCart className="h-5 w-5 text-accent" />} description="For discretionary spending." />
                     <SummaryCard title="Savings" amount={monthlySavings} icon={<PiggyBank className="h-5 w-5 text-green-500" />} description="For goals & emergencies." />
@@ -336,14 +338,7 @@ export default function OnboardingPage() {
                   </CardFooter>
               </Card>
 
-              <div className="pt-6">
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" size="lg">
-                  Complete Setup
-                </Button>
-                <p className="text-center text-sm text-muted-foreground mt-4">
-                  You can always adjust these settings later from your profile.
-                </p>
-              </div>
+              <Button type="submit" className="w-full" size="lg">Complete Setup</Button>
             </form>
           </Form>
         </CardContent>

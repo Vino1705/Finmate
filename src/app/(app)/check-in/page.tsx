@@ -20,6 +20,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { EndOfDaySummary } from '@/components/end-of-day-summary';
 import { Cell, Legend, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
+import MicRecorder from '@/components/mic-recorder';
+import OcrUploader from '@/components/ocr-uploader';
 
 const expenseSchema = z.object({
   id: z.string().optional(),
@@ -117,6 +119,70 @@ export default function CheckInPage() {
           <CardDescription>Keep track of your daily spending.</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 flex flex-col items-center">
+            <div className="w-full flex justify-end mb-3">
+              <MicRecorder
+                targetForm="expense"
+                onResult={({ text, parsed }) => {
+                  // If parsed expense looks valid, add it
+                  if (parsed && parsed.description && parsed.amount) {
+                    const cat = parsed.categoryNormalized || parsed.category || 'Other';
+                    addTransaction({
+                      description: parsed.description,
+                      amount: Number(parsed.amount),
+                      category: cat,
+                    });
+                    toast({ title: 'Expense added from voice', description: `${parsed.description} — ${cat}` });
+                    form.reset({ amount: 0, category: '', description: '' });
+                    return;
+                  }
+
+                  if (text) {
+                    // fallback: try to extract amount and description crudely
+                    const amt = (text.match(/(\d+[.,]?\d*)/) || [])[1];
+                    const desc = text.replace(/(\d+[.,]?\d*)/, '').trim();
+                    if (amt && desc) {
+                      addTransaction({ description: desc, amount: Number(amt.replace(/,/g, '')), category: 'Other' });
+                      toast({ title: 'Expense added from voice', description: `${desc} — Other` });
+                      form.reset({ amount: 0, category: '', description: '' });
+                    }
+                  }
+                }}
+              />
+            </div>
+
+            {/* OCR uploader on its own line beneath the mic */}
+            <div className="w-full flex justify-end mt-2">
+              <OcrUploader
+                targetForm="expense"
+                onResult={({ text, parsed }) => {
+                  if (parsed && parsed.description && parsed.amount) {
+                    const cat = parsed.categoryNormalized || parsed.category || 'Other';
+                    addTransaction({ description: parsed.description, amount: Number(parsed.amount), category: cat });
+                    toast({ title: 'Expense added from image', description: `${parsed.description} — ${cat}` });
+                    form.reset({ amount: 0, category: '', description: '' });
+                    return;
+                  }
+
+                  if (text) {
+                    const amt = (text.match(/(\d+[.,]?\d*)/) || [])[1];
+                    const desc = text.replace(/(\d+[.,]?\d*)/, '').trim();
+                    if (amt && desc) {
+                      addTransaction({ description: desc, amount: Number(amt.replace(/,/g, '')), category: 'Other' });
+                      toast({ title: 'Expense added from image', description: `${desc} — Other` });
+                      form.reset({ amount: 0, category: '', description: '' });
+                    }
+                  }
+                }}
+              />
+            </div>
+
+            <div className="w-full flex items-center text-muted-foreground my-2">
+              <div className="flex-grow h-px bg-muted mr-2" />
+              <div className="text-sm px-2">OR</div>
+              <div className="flex-grow h-px bg-muted ml-2" />
+            </div>
+          </div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
