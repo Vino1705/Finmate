@@ -113,37 +113,12 @@ export default function OnboardingPage() {
     <div className="flex items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-4xl">
         <CardHeader>
-          <CardTitle className="text-2xl">Welcome to Kart-i-quo!</CardTitle>
+          <CardTitle className="text-2xl">Welcome to FinMate!</CardTitle>
           <CardDescription>Let's set up your financial profile to tailor your experience.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="flex justify-end">
-                <MicRecorder
-                  targetForm="onboarding"
-                  onResult={({ text, parsed }) => {
-                    if (text) {
-                      // If parsed exists and has structured fields, set them
-                      if (parsed) {
-                        if (parsed.role) form.setValue('role', parsed.role);
-                        if (parsed.income) form.setValue('income', parsed.income);
-                        if (Array.isArray(parsed.fixedExpenses)) {
-                          // replace field array
-                          form.reset({ ...form.getValues(), fixedExpenses: parsed.fixedExpenses.map((fe: any) => ({ name: fe.name || '', amount: fe.amount || 0, category: fe.category || 'Other', timelineMonths: fe.timelineMonths ?? null, startDate: fe.startDate })) });
-                        }
-                      } else {
-                        // naive parsing: try to pull numbers for income
-                        const incomeMatch = (text || '').match(/income\s*(?:is|:)?\s*([0-9,]+)/i);
-                        if (incomeMatch) {
-                          const num = Number(incomeMatch[1].replace(/,/g, ''));
-                          if (!Number.isNaN(num)) form.setValue('income', num);
-                        }
-                      }
-                    }
-                  }}
-                />
-              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <FormField
                   control={form.control}

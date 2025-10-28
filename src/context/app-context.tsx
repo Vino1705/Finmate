@@ -37,11 +37,11 @@ interface AppContextType {
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const KART_I_QUO_PREFIX = 'kart-i-quo-';
-const PROFILE_KEY = `${KART_I_QUO_PREFIX}profile`;
-const GOALS_KEY = `${KART_I_QUO_PREFIX}goals`;
-const TRANSACTIONS_KEY = `${KART_I_QUO_PREFIX}transactions`;
-const LOGGED_PAYMENTS_KEY = `${KART_I_QUO_PREFIX}logged-payments`;
+const FINMATE_PREFIX = 'finmate-';
+const PROFILE_KEY = `${FINMATE_PREFIX}profile`;
+const GOALS_KEY = `${FINMATE_PREFIX}goals`;
+const TRANSACTIONS_KEY = `${FINMATE_PREFIX}transactions`;
+const LOGGED_PAYMENTS_KEY = `${FINMATE_PREFIX}logged-payments`;
 
 const calculateBudget = (income: number, fixedExpenses: { amount: number }[]): Pick<UserProfile, 'monthlyNeeds' | 'monthlyWants' | 'monthlySavings' | 'dailySpendingLimit'> => {
     const needs = fixedExpenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);

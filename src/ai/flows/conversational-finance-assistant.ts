@@ -51,7 +51,7 @@ const prompt = ai.definePrompt({
   input: {schema: ConversationalFinanceAssistantInputSchema},
   output: {schema: ConversationalFinanceAssistantOutputSchema},
   model: 'googleai/gemini-2.5-flash',
-  prompt: `You are a helpful and friendly AI financial assistant called Kart-i-quo. Your goal is to provide clear, actionable financial advice based on the user's specific situation.
+  prompt: `You are a helpful and friendly AI financial assistant called FinMate. Your goal is to provide clear, actionable financial advice based on the user's specific situation.
 
 You will be given a user's profile, their financial context, and a specific query. Analyze all this information to provide a comprehensive response.
 

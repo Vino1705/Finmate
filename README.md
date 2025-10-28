@@ -1,5 +1,189 @@
-# Firebase Studio
+***
 
-This is a NextJS starter in Firebase Studio.
+# 🟪 FinMate
 
-To get started, take a look at src/app/page.tsx.
+*FinMate* is a modern, AI-powered personal finance management app built for everyday professionals, students, and families. Track your expenses, set and achieve savings goals, manage recurring costs, and grow your financial confidence—all in a sleek, secure, and intuitive platform.
+
+***
+
+## ✨ Key Features
+
+### *🔐 Authentication & Onboarding*
+- Sign up and login securely using Firebase.
+- Guided onboarding: Set your user role (Student/Professional/Housewife), income, and fixed monthly expenses.
+
+### *📊 Dashboard*
+- See an instant snapshot of your monthly finances: Income, overall and daily spending, savings, goals, emergency fund, and category breakdowns.
+- Visual analytics for recent spending and active goals.
+- Smart alerts if you exceed your daily spending limit or near important milestones.
+- Export comprehensive financial reports in multiple formats:
+  - Detailed PDF reports with financial insights and recommendations
+  - CSV export for spreadsheet analysis
+  - JSON data for external integrations
+
+### *📝 Daily Expense Logging (Check-In)*
+- Quickly log today’s expenses, specifying category, amount, and description.
+- Real-time progress against your set daily limit.
+- Interactive pie charts visualize spending by category each day.
+
+### *📒 Expenses & Analysis*
+- Powerful filters by week, month, or full history.
+- See vertical bar charts breaking down spending per category.
+- Review and sort transactions in detail.
+- AI Recommendations: Personalized insights for budgeting and saving better.
+
+### *📅 Fixed Expenses & EMIs*
+- Add, edit, and check off fixed monthly expenses (like rent, subscriptions, EMIs).
+- Timeline tracking for EMIs/loans with progress bars and upcoming deadline alerts.
+- Pie chart of fixed spending distribution.
+
+### *🎯 Goals Management*
+- Create, edit, and track financial goals (big purchase, vacation, etc.).
+- Specify target amount, timeline, monthly contribution.
+- View progress bars and bar charts comparing goal vs. saved amount.
+- Contribution history and forecasts for when you’ll reach your goals.
+
+### *🛡 Emergency Fund*
+- Set a savings target and contribute/withdraw as needed.
+- Track progress and view full transaction history.
+- Recommendations to help you stay financially secure.
+
+### *⚡ Smart, Modular UI*
+- Fast navigation via the sidebar and top bar.
+- Customized for dark mode & theming (purple and neutral design).
+- Mobile responsive: Works across devices.
+- Professional PDF report generation with detailed insights.
+
+### *📑 Advanced Reporting*
+- Generate comprehensive PDF financial reports
+  - Complete financial summary with income, expenses, and savings
+  - Detailed fixed expenses breakdown with timeline tracking
+  - Goals progress and emergency fund status
+  - Transaction history and spending patterns
+  - AI-powered actionable financial insights
+- Export data in multiple formats (CSV, JSON)
+- Custom formatting for Indian Rupee (₹) currency
+
+### *🧠 AI & Automation*
+- AI-driven recommendations for improving savings and identifying spending leaks.
+- Goal forecasts and alerts about financial behavior.
+
+### *⚙ Profile & Settings*
+- Edit your profile, update role/income, and manage recurring expenses.
+- "Danger Zone": Secure, confirmed deletion of all user data.
+
+***
+
+## 🛠 Tech Stack
+
+| Tool / Library       | Purpose                                     |
+|----------------------|---------------------------------------------|
+| Next.js              | App framework & routing                     |
+| React & React Hooks  | UI logic, state, and rendering              |
+| TypeScript           | Type safety, robustness                     |
+| Tailwind CSS         | Fast, utility-based responsive styling      |
+| shadcn/ui            | Headless UI primitives and custom components|
+| Firebase Auth        | User authentication & session management    |
+| Recharts             | Data visualization (charts, graphs)         |
+| date-fns             | Date parsing and formatting                 |
+| react-hook-form      | Declarative, scalable form management       |
+| zod                  | Type-safe form validation                   |
+| lucide-react         | Modern, easily customizable icons           |
+| jsPDF                | PDF report generation                       |
+| jspdf-autotable      | Structured PDF tables and layouts           |
+| Custom hooks/utilities| Centralized business logic, classnames     |
+
+***
+
+## 🗂 Folder Structure
+
+
+src/
+  app/             # Next.js pages and routing
+  components/      # Shared UI primitives & custom components
+  hooks/           # Project and utility React hooks
+  lib/             # Firebase, types, utils
+  styles/          # Tailwind config, global CSS
+public/            # Static assets (logo, images)
+.env.local         # Environment variables
+
+
+***
+
+## ⚡ Getting Started
+
+### *1. Clone and Install*
+bash
+git clone https://github.com/Vino1705/Kart-i-quo.git
+cd Kart-i-quo
+npm install
+# or
+yarn install
+
+
+### *2. Set up Firebase*
+- Go to the [Firebase Console](https://console.firebase.google.com/), create a project, enable Email/Password authentication.
+- Get your project’s config keys (API key, Auth domain, Project ID, App ID).
+
+### *3. Configure Environment Variables*
+Create a .env.local file at the repo root:
+
+NEXT_PUBLIC_FIREBASE_API_KEY=YOUR_API_KEY
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=YOUR_AUTH_DOMAIN
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=YOUR_PROJECT_ID
+NEXT_PUBLIC_FIREBASE_APP_ID=YOUR_APP_ID
+
+
+### *4. Run the App*
+bash
+npm run dev
+# or
+yarn dev
+
+View the app at [http://localhost:3000](http://localhost:3000)
+
+***
+
+## 🔒 Security & Best Practices
+
+- All authentication via secure Firebase flows.
+- Environment variables keep secrets out of source.
+- TypeScript with strict schemas for safe, reliable data handling.
+- Profile and expense data is never exposed to unauthorized users.
+
+***
+
+## 👨‍💻 Contributing
+
+1. Fork this repo
+2. Create a branch (git checkout -b amazing-feature)
+3. Commit your changes and push your branch
+4. Open a Pull Request!
+
+***
+
+## 🙋 FAQ
+
+*Is this production ready?*  
+This codebase provides robust, scalable foundations for both hackathons and real deployments. Harden for prod by enabling stricter build rules, more test coverage, persistent backend (e.g., Firestore), and real CI workflows.
+
+*Can I add more AI features?*  
+Yes! Modular hooks & component design make it easy to integrate external AI APIs for more personalized insights.
+
+***
+
+## 🏆 Credits
+
+Made with 💜 by
+- [Vino1705](https://github.com/Vino1705)
+- [Ganesh-0509](https://github.com/Ganesh-0509)
+
+***
+
+## 📣 Thanks for using *FinMate*!
+
+For bugs, ideas, and features—open a GitHub issue or pull request.
+
+***
+
+*Take control of your finances—set goals, log expenses, and start winning with FinMate!*

@@ -4,6 +4,8 @@
 import { usePathname } from 'next/navigation';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import ExportReport from '@/components/export-report';
+import { PdfExport } from '@/components/pdf-export';
 import { useApp } from '@/hooks/use-app';
 
 const pageTitles: { [key: string]: string } = {
@@ -43,6 +45,10 @@ export function DashboardHeader() {
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <SidebarTrigger className="md:hidden" />
       <h1 className="flex-1 text-xl font-semibold tracking-tight">{title}</h1>
+      <div className="flex items-center gap-2 mr-3">
+        <ExportReport />
+        <PdfExport />
+      </div>
       <Avatar>
         <AvatarImage src={`https://avatar.vercel.sh/${avatarIdentifier}.png`} />
         <AvatarFallback>{getInitials(avatarIdentifier)}</AvatarFallback>
