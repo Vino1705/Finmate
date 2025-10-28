@@ -87,7 +87,7 @@ export default function DashboardPage() {
   if (!profile) {
     return (
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Welcome to Kart-i-quo!</h2>
+        <h2 className="text-2xl font-bold mb-4">Welcome to FinMate!</h2>
         <p className="text-muted-foreground mb-6">Please complete the onboarding to start managing your finances.</p>
         <Button asChild>
           <Link href="/onboarding">Start Onboarding</Link>
@@ -97,8 +97,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="space-y-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard 
           title="Monthly Income" 
           value={`₹${income.toFixed(2)}`}
@@ -131,41 +131,41 @@ export default function DashboardPage() {
             <CardTitle>Financial Breakdown</CardTitle>
             <CardDescription>Your monthly budget allocated across Needs, Wants, and Savings.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-3">
-                <div className="p-4 rounded-lg bg-muted flex flex-col justify-center items-center">
+            <CardContent className="grid gap-6">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="p-4 rounded-lg bg-muted/50 flex flex-col justify-center items-center">
                     <Wallet className="h-6 w-6 text-primary mb-2" />
                     <p className="text-sm text-muted-foreground">Needs</p>
                     <p className="text-lg font-bold">₹{monthlyNeeds.toFixed(2)}</p>
                 </div>
-                 <div className="p-4 rounded-lg bg-muted flex flex-col justify-center items-center">
+                <div className="p-4 rounded-lg bg-muted/50 flex flex-col justify-center items-center">
                     <ShoppingCart className="h-6 w-6 text-accent mb-2" />
                     <p className="text-sm text-muted-foreground">Wants</p>
                     <p className="text-lg font-bold">₹{monthlyWants.toFixed(2)}</p>
                 </div>
-                 <div className="p-4 rounded-lg bg-muted flex flex-col justify-center items-center">
+                <div className="p-4 rounded-lg bg-muted/50 flex flex-col justify-center items-center">
                     <PiggyBank className="h-6 w-6 text-green-500 mb-2" />
                     <p className="text-sm text-muted-foreground">Savings</p>
                     <p className="text-lg font-bold">₹{monthlySavings.toFixed(2)}</p>
                 </div>
-                <Card className="md:col-span-3">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">Monthly Savings Allocation</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="flex items-center gap-2 text-muted-foreground"><Target className="h-4 w-4" /> Committed to Goals</span>
-                            <span className="font-semibold">₹{goalContributions.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="flex items-center gap-2 text-muted-foreground"><ShieldCheck className="h-4 w-4" /> Available for Emergency Fund</span>
-                            <span className="font-semibold">₹{Math.max(0, monthlySavings - goalContributions).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-base font-bold pt-2 border-t mt-2">
-                            <span>Total Monthly Savings</span>
-                            <span>₹{monthlySavings.toFixed(2)}</span>
-                        </div>
-                    </CardContent>
-                </Card>
+              </div>
+              <div className="space-y-4 pt-4 border-t">
+                <h4 className="text-sm font-medium">Monthly Savings Allocation</h4>
+                <div className="space-y-3">
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="flex items-center gap-2 text-muted-foreground"><Target className="h-4 w-4" /> Committed to Goals</span>
+                        <span className="font-semibold">₹{goalContributions.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="flex items-center gap-2 text-muted-foreground"><ShieldCheck className="h-4 w-4" /> Available for Emergency Fund</span>
+                        <span className="font-semibold">₹{Math.max(0, monthlySavings - goalContributions).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-base font-bold pt-2 border-t">
+                        <span>Total Monthly Savings</span>
+                        <span>₹{monthlySavings.toFixed(2)}</span>
+                    </div>
+                </div>
+              </div>
             </CardContent>
         </Card>
          <Link href="/emergency-fund" className="block">
@@ -193,19 +193,20 @@ export default function DashboardPage() {
 
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+        <Card className="h-full">
           <CardHeader>
             <CardTitle>Recent Spending</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData}>
+              <BarChart data={chartData} margin={{ top: 0, right: 16, bottom: 0, left: 0 }}>
                 <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false}/>
                 <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`}/>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
+                    backgroundColor: 'hsl(var(--card))',
                     borderColor: 'hsl(var(--border))',
+                    borderRadius: '8px',
                   }}
                   labelStyle={{ color: 'hsl(var(--foreground))' }}
                   formatter={(value: number) => `₹${value.toFixed(2)}`}
@@ -216,7 +217,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="h-full">
           <CardHeader>
             <CardTitle>Active Goals</CardTitle>
           </CardHeader>

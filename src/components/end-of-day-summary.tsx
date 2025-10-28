@@ -9,7 +9,7 @@ import { TrendingDown, TrendingUp, PartyPopper, Wallet } from 'lucide-react';
 import { Progress } from './ui/progress';
 
 const SUMMARY_HOUR_THRESHOLD = 20; // 8 PM
-const LAST_SUMMARY_KEY = 'kart-i-quo-last-summary-date';
+const LAST_SUMMARY_KEY = 'FinMate-last-summary-date';
 
 export function EndOfDaySummary() {
   const { profile, getTodaysSpending } = useApp();

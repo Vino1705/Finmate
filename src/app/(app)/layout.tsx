@@ -32,38 +32,46 @@ const navItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, user, profile } = useApp();
-  const [authChecked, setAuthChecked] = useState(false);
+  const { logout, user, profile, authLoaded } = useApp();
 
   useEffect(() => {
+    if (!authLoaded) return;
+    // If we've checked auth and there's no user, send them to login
     if (user === null) {
         router.replace('/login');
     }
-    setAuthChecked(true);
-  }, [user, router]);
-  
+  }, [authLoaded, user, router]);
+
   useEffect(() => {
-    if (authChecked && user) {
-        const hasCompletedOnboarding = profile && profile.role;
-        const isOnboardingPage = pathname === '/onboarding';
+    if (!authLoaded || !user) return;
+    const hasCompletedOnboarding = profile && profile.role;
+    const isOnboardingPage = pathname === '/onboarding';
 
-        if (hasCompletedOnboarding && isOnboardingPage) {
-            router.replace('/dashboard');
-        } else if (!hasCompletedOnboarding && !isOnboardingPage) {
-            router.replace('/onboarding');
-        }
+    if (hasCompletedOnboarding && isOnboardingPage) {
+        router.replace('/dashboard');
+    } else if (!hasCompletedOnboarding && !isOnboardingPage) {
+        router.replace('/onboarding');
     }
-  }, [authChecked, user, profile, pathname, router]);
+  }, [authLoaded, user, profile, pathname, router]);
 
-  if (!authChecked || !user || !profile?.role) {
-    // Show a loading state or the onboarding page itself
-    if (pathname === '/onboarding') {
-        return <>{children}</>;
-    }
+  if (!authLoaded) {
     return (
-        <div className="flex h-screen items-center justify-center">
-            <p>Loading your experience...</p>
-        </div>
+      <div className="flex h-screen items-center justify-center">
+        <p>Loading your experience...</p>
+      </div>
+    );
+  }
+
+  if (user === null || !profile?.role) {
+    // Show onboarding page if applicable, otherwise show a loading state while redirects occur
+    if (pathname === '/onboarding') {
+      return <>{children}</>;
+    }
+
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p>Loading your experience...</p>
+      </div>
     );
   }
 
@@ -73,8 +81,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2">
-                <Logo />
-                <span className="font-bold text-lg">Kart-i-quo</span>
+                <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                  <img
+                    src="/FINMATE.png"
+                    alt="FinMate"
+                    width={28}
+                    height={28}
+                    className="object-contain"
+                  />
+                </div>
+                <span className="font-bold text-lg text-[#4ADE80]">FinMate</span>
             </div>
           </SidebarHeader>
           <SidebarContent>

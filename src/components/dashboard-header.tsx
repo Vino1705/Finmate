@@ -13,7 +13,7 @@ const pageTitles: { [key: string]: string } = {
   '/expenses': 'Expense Analysis',
   '/fixed-expenses': 'Fixed Expenses Analysis',
   '/emergency-fund': 'Emergency Fund',
-  '/onboarding': 'Welcome to Kart-i-quo',
+  '/onboarding': 'Welcome to FinMate',
   '/settings': 'Profile Settings',
 };
 
@@ -24,7 +24,7 @@ export function DashboardHeader() {
   const displayName = profile?.name ?? user?.displayName;
   const title = (displayName && pathname === '/dashboard')
     ? `Hello, ${displayName.split(' ')[0]}!`
-    : pageTitles[pathname] || 'Kart-i-quo';
+    : pageTitles[pathname] || 'FinMate';
 
   const getInitials = (emailOrName: string | undefined) => {
     if (!emailOrName) return 'U';

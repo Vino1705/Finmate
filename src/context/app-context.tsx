@@ -10,7 +10,8 @@ import { useRouter } from 'next/navigation';
 import { format, formatISO, startOfDay, parseISO } from 'date-fns';
 
 interface AppContextType {
-  user: User | null;
+  user: User | null | undefined;
+  authLoaded: boolean;
   profile: UserProfile | null | undefined; // Allow undefined for initial loading state
   goals: Goal[];
   transactions: Transaction[];
@@ -62,12 +63,13 @@ const calculateBudget = (income: number, fixedExpenses: { amount: number }[]): P
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null | undefined>(undefined);
   const [profile, setProfile] = useState<UserProfile | null | undefined>(undefined); // Start as undefined
   const [goals, setGoals] = useState<Goal[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loggedPayments, setLoggedPayments] = useState<LoggedPayments>({});
   const [onboardingComplete, setOnboardingComplete] = useState(false);
+  const [authLoaded, setAuthLoaded] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -109,6 +111,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setLoggedPayments({});
             setOnboardingComplete(false);
         }
+    // Mark that auth state has been determined at least once
+    setAuthLoaded(true);
     });
     return () => unsubscribe();
   }, []);
@@ -398,6 +402,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const value: AppContextType = {
     user,
+    authLoaded,
     profile,
     goals,
     transactions,
