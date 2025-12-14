@@ -97,17 +97,16 @@
 
 ## 🗂 Folder Structure
 
-
-src/
-  app/             # Next.js pages and routing
-  components/      # Shared UI primitives & custom components
-  hooks/           # Project and utility React hooks
-  lib/             # Firebase, types, utils
-  styles/          # Tailwind config, global CSS
-public/            # Static assets (logo, images)
-.env.local         # Environment variables
-
-
+```
+  src/
+    app/             # Next.js pages and routing
+    components/      # Shared UI primitives & custom components
+    hooks/           # Project and utility React hooks
+    lib/             # Firebase, types, utils
+    styles/          # Tailwind config, global CSS
+  public/            # Static assets (logo, images)
+  .env.local         # Environment variables
+```
 ***
 
 ## ⚡ Getting Started
@@ -128,12 +127,19 @@ yarn install
 ### *3. Configure Environment Variables*
 Create a .env.local file at the repo root:
 
-NEXT_PUBLIC_FIREBASE_API_KEY=YOUR_API_KEY
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=YOUR_AUTH_DOMAIN
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=YOUR_PROJECT_ID
-NEXT_PUBLIC_FIREBASE_APP_ID=YOUR_APP_ID
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
 
-
+# Google AI Configuration
+GEMINI_API_KEY=your_gemini_api_key
+GOOGLE_PROJECT_ID=your_google_project_id
+GOOGLE_CLOUD_PROJECT=your_google_cloud_project_id
+```
 ### *4. Run the App*
 bash
 npm run dev
