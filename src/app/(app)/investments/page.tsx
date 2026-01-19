@@ -122,38 +122,38 @@ export default function InvestmentsPage() {
       </Alert>
 
       {/* Portfolio Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Portfolio Value</CardTitle>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="h-full">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-medium text-muted-foreground">Portfolio Value</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{portfolioValue.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-muted-foreground">Total current value of all investments</p>
+          <CardContent className="space-y-3">
+            <div className="text-4xl font-bold">₹{portfolioValue.toLocaleString('en-IN')}</div>
+            <p className="text-sm text-muted-foreground">Total current value of all investments</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Gain/Loss</CardTitle>
+        <Card className="h-full">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-medium text-muted-foreground">Total Gain/Loss</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${portfolioGain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <CardContent className="space-y-3">
+            <div className={`text-4xl font-bold ${portfolioGain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               ₹{Math.abs(portfolioGain).toLocaleString('en-IN')}
             </div>
-            <p className={`text-xs ${gainPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-sm ${gainPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {gainPercentage >= 0 ? '+' : ''}{gainPercentage.toFixed(2)}%
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Investments</CardTitle>
+        <Card className="h-full">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-medium text-muted-foreground">Active Investments</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{investments.length}</div>
-            <p className="text-xs text-muted-foreground">Across {new Set(investments.map(i => i.type)).size} asset classes</p>
+          <CardContent className="space-y-3">
+            <div className="text-4xl font-bold">{investments.length}</div>
+            <p className="text-sm text-muted-foreground">Across {new Set(investments.map(i => i.type)).size} asset classes</p>
           </CardContent>
         </Card>
       </div>
