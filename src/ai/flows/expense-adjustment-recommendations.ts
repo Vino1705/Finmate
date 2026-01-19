@@ -12,8 +12,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const ExpenseAdjustmentRecommendationsInputSchema = z.object({
-  income: z.number().describe('The user’s total monthly income in Indian Rupees.'),
-  fixedExpenses: z.array(
+  income: z.number().describe('The user’s total monthly income in Indian Rupees.'),  role: z.enum(['Student', 'Professional', 'Housewife']).describe("The user's role for tailored advice."),  fixedExpenses: z.array(
     z.object({
       name: z.string().describe('The name of the fixed expense.'),
       amount: z.number().describe('The amount of the fixed expense in Indian Rupees.'),
@@ -63,6 +62,7 @@ const prompt = ai.definePrompt({
   prompt: `You are a personal finance advisor. Your task is to provide a list of specific and actionable tips to help a user adjust their spending to meet their financial goals.
 
 ## User's Financial Profile:
+- **Role:** {{role}}
 - **Monthly Income:** ₹{{income}}
 - **Fixed Expenses:**
 {{#each fixedExpenses}}
@@ -81,9 +81,12 @@ const prompt = ai.definePrompt({
 ## Your Instructions:
 1.  **Analyze the User's Data:** Review their income, fixed costs, goals, and especially their recent spending habits.
 2.  **Focus on Low-Hanging Fruit:** Identify 2-3 categories from their 'Recent Discretionary Spending' where they can make small, impactful changes.
-3.  **Generate Actionable Tips:** For each category, provide a concise, actionable tip. The tips should be realistic and easy to implement.
+3.  **Generate Role-Specific Actionable Tips:**
+    - For **Students**: Suggest student discounts, free resources, budget-friendly alternatives, or sharing economy options.
+    - For **Professionals**: Suggest optimization strategies, automation, premium-to-standard downgrades, or reallocation (not restriction).
+    - For **Housewives**: Suggest bulk buying, seasonal planning, local market shopping, or community resource sharing.
 4.  **Be Specific and Concise:** Do not give generic advice. Your tips must be direct and in bullet-point format.
-5.  **Contextualize for India:** Where possible, make sure the tips are relevant to an Indian context.
+5.  **Contextualize for India:** Where possible, make sure the tips are relevant to an Indian context (local markets, UPI cashback, etc.).
 6.  **Focus on Expense Reduction Only:** Do not suggest increasing income. All tips must be about reducing spending.
 
 Based on these instructions, generate a list of tips for the 'recommendations' field.`,

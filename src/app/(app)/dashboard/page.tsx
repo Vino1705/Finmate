@@ -43,11 +43,28 @@ export default function DashboardPage() {
   const income = profile?.income || 0;
   const spendingVsIncome = income > 0 ? `${((overallSpending / income) * 100).toFixed(0)}% of income` : '';
 
-  const recentTransactions = transactions.slice(0, 7).reverse();
-  const chartData = recentTransactions.map(t => ({
-      date: new Date(t.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short'}),
-      amount: t.amount,
-  }));
+  // Group transactions by date and sum daily spending
+  const dailySpendingMap = React.useMemo(() => {
+    const spendingByDate = new Map<string, number>();
+    
+    transactions.forEach(t => {
+      const dateKey = new Date(t.date).toISOString().split('T')[0]; // YYYY-MM-DD format
+      const current = spendingByDate.get(dateKey) || 0;
+      spendingByDate.set(dateKey, current + t.amount);
+    });
+    
+    return spendingByDate;
+  }, [transactions]);
+
+  // Get last 7 days of aggregated spending for chart
+  const chartData = React.useMemo(() => {
+    const sortedDates = Array.from(dailySpendingMap.keys()).sort().reverse().slice(0, 7);
+    
+    return sortedDates.reverse().map(dateKey => ({
+      date: new Date(dateKey).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+      amount: dailySpendingMap.get(dateKey) || 0,
+    }));
+  }, [dailySpendingMap]);
 
   const {
     monthlyNeeds,

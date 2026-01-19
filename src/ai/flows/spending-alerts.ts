@@ -14,6 +14,7 @@ import {z} from 'genkit';
 
 const SpendingAlertsInputSchema = z.object({
   income: z.number().describe("The user's monthly income."),
+  role: z.enum(['Student', 'Professional', 'Housewife']).describe("The user's role for personalized suggestions."),
   goals: z.array(z.object({
     name: z.string(),
     targetAmount: z.number(),
@@ -44,6 +45,7 @@ const prompt = ai.definePrompt({
   prompt: `You are FinMate's proactive financial analyst. Your job is to analyze a user's spending habits and provide a concise, actionable suggestion for the next week.
 
 ## User's Financial Profile:
+- **Role:** {{{role}}}
 - **Monthly Income:** ₹{{{income}}}
 - **Financial Goals:**
 {{#each goals}}
@@ -62,10 +64,15 @@ Based on all the information above, generate a single, concise, and actionable s
 
 1.  **Analyze Spending Patterns:** Look at the user's recent spending. Identify the single category where they spend the most.
 2.  **Connect to Goals:** Briefly mention how adjusting this spending can help them reach a goal faster.
-3.  **Create a Forward-Looking Suggestion:** Generate a friendly and encouraging suggestion for the next week. It should recommend a small, achievable adjustment in their top spending category.
+3.  **Create Role-Specific Forward-Looking Suggestions:** 
+    - For **Students**: Suggest free alternatives, student discounts, or budget-friendly options. Focus on small changes that don't impact lifestyle drastically.
+    - For **Professionals**: Suggest optimization and reallocation strategies. Don't restrict, but encourage smarter choices (meal prep vs dining out, carpooling vs solo commute).
+    - For **Housewives**: Suggest bulk buying, seasonal planning, or community resources. Focus on maximizing household efficiency.
 
-**Good Suggestion Example:** "To help you reach your 'New Laptop' goal faster, try reducing your 'Food & Dining' expenses by just 10% this coming week. Small changes make a big difference!"
-**Bad Suggestion Example:** "You are spending too much money."
+**Example Suggestions:**
+- **Student:** "To reach your 'Laptop' goal faster, try using student discounts or open-source alternatives for your 'Education' expenses this week. Even ₹500 saved helps!"
+- **Professional:** "Reallocate 10% of your 'Food & Dining' budget to meal prep this week — you'll save ₹2000 monthly and hit your 'Vacation' goal 2 months earlier!"
+- **Housewife:** "Buy groceries in bulk this week to reduce 'Groceries' expenses by 15%. Seasonal vegetables are cheaper and help your 'Kids Education' fund grow faster!"
 
 Now, generate the 'suggestion' field based on your analysis of the user's data.`,
 });

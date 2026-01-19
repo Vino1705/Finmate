@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
+import { cn, calculateRoleBudget } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const fixedExpenseSchema = z.object({
@@ -72,52 +72,16 @@ export default function OnboardingPage() {
   
   const watchedIncome = form.watch('income');
   const watchedFixedExpenses = form.watch('fixedExpenses');
+  const watchedRole = form.watch('role');
 
+  // Role-based budget calculation: Student 60/30/10, Professional 50/30/20, Housewife 55/25/20
   const { monthlyNeeds, monthlyWants, monthlySavings, dailyLimit } = React.useMemo(() => {
     const income = Number(watchedIncome) || 0;
     const fixedExpenses = watchedFixedExpenses || [];
+    const fixedExpensesTotal = fixedExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
 
-    const needs = fixedExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
-
-    // Ensure Needs + Wants + Savings === income
-    // Primary goal: follow 50/30/20 when possible. If fixed needs push past 50% of income,
-    // allocate the remaining disposable income (income - needs) using a 60/40 split (wants/savings).
-
-    let wants = 0;
-    let savings = 0;
-
-    if (income <= 0) {
-      wants = 0;
-      savings = 0;
-    } else {
-      const needsThreshold = income * 0.5;
-
-      if (needs <= needsThreshold) {
-        // Ideal 50/30/20 splits
-        const wantsTarget = income * 0.3;
-        const savingsTarget = income * 0.2;
-
-        // If needs + targets < income, put any small remainder into Wants (discretionary)
-        const remainder = income - (needs + wantsTarget + savingsTarget);
-        wants = wantsTarget + (remainder > 0 ? remainder : 0);
-        savings = savingsTarget;
-      } else {
-        // Needs exceed 50% of income — allocate remaining disposable income (if any)
-        const disposable = Math.max(income - needs, 0);
-        if (disposable > 0) {
-          wants = disposable * 0.6;
-          savings = disposable * 0.4;
-        } else {
-          wants = 0;
-          savings = 0;
-        }
-      }
-    }
-
-    const daily = wants > 0 ? wants / 30 : 0;
-
-    return { monthlyNeeds: needs, monthlyWants: wants, monthlySavings: savings, dailyLimit: daily };
-  }, [watchedIncome, watchedFixedExpenses]);
+    return calculateRoleBudget(income, fixedExpensesTotal, watchedRole);
+  }, [watchedIncome, watchedFixedExpenses, watchedRole]);
 
 
   function onSubmit(data: OnboardingValues) {

@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { expenseCategories, Transaction } from '@/lib/types';
+import { getRoleExpenseCategories, Transaction } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -45,6 +45,11 @@ export default function CheckInPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const { toast } = useToast();
+
+  // Get role-specific expense categories (most relevant shown first)
+  const expenseCategories = useMemo(() => {
+    return getRoleExpenseCategories(profile?.role || 'Professional');
+  }, [profile?.role]);
 
   const form = useForm<ExpenseValues>({
     resolver: zodResolver(expenseSchema),

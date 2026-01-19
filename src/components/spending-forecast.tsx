@@ -50,6 +50,7 @@ export function SpendingForecast() {
       // 2. Call the AI for qualitative alerts
       const input: SpendingAlertsInput = {
         income: profile.income,
+        role: profile.role || 'Professional', // Pass role for personalized alerts
         goals: goals.map(g => ({ name: g.name, targetAmount: g.targetAmount, monthlyContribution: g.monthlyContribution })),
         expensesData: transactions
           .filter(t => t.category)

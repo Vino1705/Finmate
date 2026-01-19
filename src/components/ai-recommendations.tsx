@@ -31,6 +31,7 @@ export function AiRecommendations() {
     try {
       const input: ExpenseAdjustmentRecommendationsInput = {
         income: profile.income,
+        role: profile.role || 'Professional', // Pass role for personalized recommendations
         fixedExpenses: profile.fixedExpenses,
         goals: goals.map(g => ({
           name: g.name,
