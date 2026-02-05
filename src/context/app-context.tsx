@@ -318,7 +318,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getTodaysSpending = useCallback(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = format(new Date(), 'yyyy-MM-dd');
     return transactions
       .filter(t => t.date.startsWith(today))
       .reduce((sum, t) => sum + t.amount, 0);

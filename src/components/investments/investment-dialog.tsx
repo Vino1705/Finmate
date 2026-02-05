@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Investment, InvestmentType, InvestmentStatus } from '@/lib/investment-types';
+import { format } from 'date-fns';
 
 import { useApp } from '@/hooks/use-app';
 
@@ -23,7 +24,7 @@ export default function InvestmentDialog({ open, onOpenChange, onSave }: Investm
   const [type, setType] = useState<InvestmentType>('Mutual Fund');
   const [purchaseAmount, setPurchaseAmount] = useState<number>(0);
   const [currentValue, setCurrentValue] = useState<number>(0);
-  const [purchaseDate, setPurchaseDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [purchaseDate, setPurchaseDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
   const [notes, setNotes] = useState('');
   const [symbol, setSymbol] = useState('');
   const [quantity, setQuantity] = useState<number>(0);
@@ -51,7 +52,7 @@ export default function InvestmentDialog({ open, onOpenChange, onSave }: Investm
     setType('Mutual Fund');
     setPurchaseAmount(0);
     setCurrentValue(0);
-    setPurchaseDate(new Date().toISOString().split('T')[0]);
+    setPurchaseDate(format(new Date(), 'yyyy-MM-dd'));
     setNotes('');
     setSymbol('');
     setQuantity(0);

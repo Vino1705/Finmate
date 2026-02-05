@@ -14,7 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useMemo, useState } from 'react';
-import { format, isSameDay, parseISO, startOfDay } from 'date-fns';
+import { format, formatISO, isSameDay, parseISO, startOfDay } from 'date-fns';
 import { CalendarIcon, Pencil, PieChart, Trash2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { EndOfDaySummary } from '@/components/end-of-day-summary';
@@ -58,7 +58,7 @@ export default function CheckInPage() {
       amount: 0,
       category: '',
       description: '',
-      date: new Date().toISOString(),
+      date: formatISO(new Date()),
     },
   });
 
@@ -66,7 +66,7 @@ export default function CheckInPage() {
     resolver: zodResolver(expenseSchema)
   });
 
-  const watchedDate = form.watch('date') || new Date().toISOString();
+  const watchedDate = form.watch('date') || formatISO(new Date());
   const selectedDayKey = watchedDate.split('T')[0];
 
   const todaysTransactions = transactions
@@ -140,7 +140,7 @@ export default function CheckInPage() {
                           description: parsed.description,
                           amount: Number(parsed.amount),
                           category: cat,
-                          date: new Date().toISOString(),
+                          date: formatISO(new Date()),
                         });
                         toast({ title: 'Expense added from voice', description: `${parsed.description} — ${cat}` });
                         form.reset({ amount: 0, category: '', description: '' });
@@ -164,7 +164,7 @@ export default function CheckInPage() {
                         description: parsed.description,
                         amount: Number(parsed.amount),
                         category: cat,
-                        date: new Date().toISOString(),
+                        date: formatISO(new Date()),
                       });
                       toast({ title: 'Expense added from image', description: `${parsed.description} — ${cat}` });
                       form.reset({ amount: 0, category: '', description: '' });
