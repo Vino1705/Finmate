@@ -29,9 +29,9 @@ export default function Chatbot() {
 
   useEffect(() => {
     if (isOpen) {
-        setMessages([
-            { role: 'assistant', content: "Hello! How can I help you with your finances today? You can ask me things like 'Can I afford to eat out?' or 'What's my safe spending limit?'" }
-        ]);
+      setMessages([
+        { role: 'assistant', content: "Hello! How can I help you with your finances today? You can ask me things like 'Can I afford to eat out?' or 'What's my safe spending limit?'" }
+      ]);
     }
   }, [isOpen]);
 
@@ -53,6 +53,27 @@ export default function Chatbot() {
       return;
     }
 
+    const { format, isSameMonth, getDaysInMonth, getDate } = await import('date-fns');
+
+    const now = new Date();
+    const currentMonthTransactions = transactions.filter(t => isSameMonth(new Date(t.date), now));
+
+    // Define category mappings (aligned with onboarding logic)
+    const needsCategories = ['Groceries', 'Transport', 'Utilities', 'Rent/EMI', 'Healthcare', 'Education'];
+    const wantsCategories = ['Food & Dining', 'Shopping', 'Entertainment', 'Other'];
+
+    const essentialExpensesLogged = currentMonthTransactions
+      .filter(t => needsCategories.includes(t.category))
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const discretionaryExpensesLogged = currentMonthTransactions
+      .filter(t => wantsCategories.includes(t.category))
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalDays = getDaysInMonth(now);
+    const currentDay = getDate(now);
+    const remainingDaysInMonth = totalDays - currentDay + 1;
+
     const userMessage: Message = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
@@ -61,11 +82,13 @@ export default function Chatbot() {
     try {
       const assistantInput: ConversationalFinanceAssistantInput = {
         query: input,
-        role: profile.role || 'Professional',
-        income: profile.income,
-        fixedExpenses: profile.fixedExpenses.map(e => ({ name: e.name, amount: e.amount })),
+        totalMonthlyIncome: profile.income,
         dailySpendingLimit: profile.dailySpendingLimit,
-        savings: goals.reduce((sum, g) => sum + g.currentAmount, 0),
+        essentialExpensesLogged: essentialExpensesLogged,
+        discretionaryExpensesLogged: discretionaryExpensesLogged,
+        savingsGoal: profile.monthlySavings,
+        remainingDaysInMonth: remainingDaysInMonth,
+        hasData: transactions.length > 0,
       };
 
       const result = await conversationalFinanceAssistant(assistantInput);
@@ -102,39 +125,39 @@ export default function Chatbot() {
               </Button>
             </CardHeader>
             <CardContent className="flex-1 overflow-hidden p-0">
-                <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
-                    <div className="space-y-4">
-                    {messages.map((message, index) => (
-                        <div key={index} className={cn("flex items-start gap-3", message.role === 'user' ? 'justify-end' : '')}>
-                            {message.role === 'assistant' && (
-                                <Avatar className="w-8 h-8">
-                                    <AvatarFallback><Bot className="w-5 h-5"/></AvatarFallback>
-                                </Avatar>
-                            )}
-                            <div className={cn("max-w-[80%] rounded-lg px-3 py-2 text-sm", 
-                                message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
-                            )}>
-                                {message.content}
-                            </div>
-                             {message.role === 'user' && (
-                                <Avatar className="w-8 h-8">
-                                    <AvatarFallback><User className="w-5 h-5"/></AvatarFallback>
-                                </Avatar>
-                            )}
-                        </div>
-                    ))}
-                    {isLoading && (
-                       <div className="flex items-start gap-3">
-                           <Avatar className="w-8 h-8">
-                               <AvatarFallback><Bot className="w-5 h-5"/></AvatarFallback>
-                           </Avatar>
-                           <div className="bg-secondary rounded-lg px-3 py-2 text-sm flex items-center">
-                               <Loader2 className="h-4 w-4 animate-spin" />
-                           </div>
-                       </div>
-                    )}
+              <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
+                <div className="space-y-4">
+                  {messages.map((message, index) => (
+                    <div key={index} className={cn("flex items-start gap-3", message.role === 'user' ? 'justify-end' : '')}>
+                      {message.role === 'assistant' && (
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback><Bot className="w-5 h-5" /></AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div className={cn("max-w-[80%] rounded-lg px-3 py-2 text-sm",
+                        message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
+                      )}>
+                        {message.content}
+                      </div>
+                      {message.role === 'user' && (
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback><User className="w-5 h-5" /></AvatarFallback>
+                        </Avatar>
+                      )}
                     </div>
-                </ScrollArea>
+                  ))}
+                  {isLoading && (
+                    <div className="flex items-start gap-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback><Bot className="w-5 h-5" /></AvatarFallback>
+                      </Avatar>
+                      <div className="bg-secondary rounded-lg px-3 py-2 text-sm flex items-center">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
             </CardContent>
             <CardFooter>
               <div className="flex w-full items-center space-x-2">

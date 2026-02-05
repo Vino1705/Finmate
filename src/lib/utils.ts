@@ -190,3 +190,57 @@ export function calculateRoleSuccessMetrics(
     }
   }
 }
+/**
+ * Vibrant chart color palette for investment visualizations
+ */
+export const CHART_COLORS = [
+  '#8b5cf6', // Violet
+  '#ec4899', // Pink
+  '#f59e0b', // Amber
+  '#10b981', // Emerald
+  '#3b82f6', // Blue
+  '#06b6d4', // Cyan
+  '#f97316', // Orange
+  '#84cc16', // Lime
+] as const;
+
+/**
+ * Get a chart color by index (wraps around for safety)
+ */
+export function getChartColor(index: number): string {
+  return CHART_COLORS[index % CHART_COLORS.length];
+}
+
+/**
+ * Group investments by type and calculate aggregate values
+ */
+export function groupInvestmentsByType(
+  investments: { type: string; currentValue: number; purchaseAmount: number }[]
+): { name: string; value: number; invested: number; count: number; gainPercent: number }[] {
+  const grouped = investments.reduce((acc, inv) => {
+    const existing = acc.find(item => item.name === inv.type);
+    if (existing) {
+      existing.value += inv.currentValue;
+      existing.invested += inv.purchaseAmount;
+      existing.count += 1;
+    } else {
+      acc.push({
+        name: inv.type,
+        value: inv.currentValue,
+        invested: inv.purchaseAmount,
+        count: 1,
+        gainPercent: 0,
+      });
+    }
+    return acc;
+  }, [] as { name: string; value: number; invested: number; count: number; gainPercent: number }[]);
+
+  // Calculate gain percentage for each group
+  grouped.forEach(group => {
+    group.gainPercent = group.invested > 0
+      ? ((group.value - group.invested) / group.invested) * 100
+      : 0;
+  });
+
+  return grouped;
+}

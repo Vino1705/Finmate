@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useApp } from '@/hooks/use-app';
 import { getDailyBriefing, DailyBriefingInput, DailyBriefingOutput } from '@/ai/flows/daily-briefing';
 import { Loader2, Sparkles, AlertTriangle, Lightbulb, ChevronDown, HelpCircle, Flame, Trophy } from 'lucide-react';
-import { format, getDate, getDaysInMonth, subDays, addDays, parseISO } from 'date-fns';
+import { format, getDate, getDaysInMonth, subDays, addDays, parseISO, startOfDay, isSameDay, isSameMonth } from 'date-fns';
 import Link from 'next/link';
 
 export function SmartDailyBriefing() {
@@ -39,6 +39,16 @@ export function SmartDailyBriefing() {
                     .reduce((sum, t) => sum + t.amount, 0);
                 const remainingMonthlyBudget = profile.monthlyWants - monthlySpending;
 
+                // Extract today's transactions for the AI
+                const today = startOfDay(now);
+                const todaysTransactions = transactions
+                    .filter(t => isSameDay(parseISO(t.date), today))
+                    .map(t => ({
+                        amount: t.amount,
+                        category: t.category || 'Other',
+                        description: t.description,
+                    }));
+
                 // Create a hash of the current state to avoid redundant calls
                 const todaysSpending = getTodaysSpending();
                 const currentHash = JSON.stringify({
@@ -46,7 +56,8 @@ export function SmartDailyBriefing() {
                     limit: profile.dailySpendingLimit,
                     spent: todaysSpending,
                     remaining: remainingMonthlyBudget,
-                    txCount: transactions.length
+                    txCount: transactions.length,
+                    todayTxHash: JSON.stringify(todaysTransactions)
                 });
 
                 if (currentHash === lastInputHash && briefing) {
@@ -57,10 +68,10 @@ export function SmartDailyBriefing() {
                 setIsLoading(true);
                 setError(null);
 
-                // Get last 30 days of transactions
+                // Get last 30 days of transactions (excluding today for history patterns)
                 const thirtyDaysAgo = subDays(now, 30);
                 const recentRawTransactions = transactions
-                    .filter(t => new Date(t.date) >= thirtyDaysAgo);
+                    .filter(t => new Date(t.date) >= thirtyDaysAgo && !isSameDay(parseISO(t.date), today));
 
                 const recentTransactions = recentRawTransactions
                     .slice(0, 50)
@@ -107,6 +118,18 @@ export function SmartDailyBriefing() {
                     runOutDate = "today";
                 }
 
+                // Define category mappings (aligned with chatbot)
+                const needsCategories = ['Groceries', 'Transport', 'Utilities', 'Rent/EMI', 'Healthcare', 'Education'];
+                const wantsCategories = ['Food & Dining', 'Shopping', 'Entertainment', 'Other'];
+
+                const essentialExpensesLogged = transactions
+                    .filter(t => isSameMonth(new Date(t.date), now) && needsCategories.includes(t.category))
+                    .reduce((sum, t) => sum + t.amount, 0);
+
+                const discretionaryExpensesLogged = transactions
+                    .filter(t => isSameMonth(new Date(t.date), now) && wantsCategories.includes(t.category))
+                    .reduce((sum, t) => sum + t.amount, 0);
+
                 const input: DailyBriefingInput = {
                     income: profile.income,
                     dailySpendingLimit: profile.dailySpendingLimit,
@@ -114,8 +137,12 @@ export function SmartDailyBriefing() {
                     dayOfWeek,
                     daysLeftInMonth,
                     remainingMonthlyBudget,
+                    todaysTransactions,
                     recentTransactions,
                     runOutDate,
+                    essentialExpensesLogged,
+                    discretionaryExpensesLogged,
+                    savingsGoal: profile.monthlySavings,
                 };
 
                 const result = await getDailyBriefing(input);

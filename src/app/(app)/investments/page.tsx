@@ -1,26 +1,164 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useApp } from '@/hooks/use-app';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, TrendingUp } from 'lucide-react';
+import { Plus, TrendingUp, RefreshCw } from 'lucide-react';
 import { Investment, SIPPlan } from '@/lib/investment-types';
 import InvestmentDialog from '@/components/investments/investment-dialog';
 import SIPCalculator from '@/components/investments/sip-calculator';
 import TaxOptimizer from '@/components/investments/tax-optimizer';
 import InvestmentRecommendations from '@/components/investments/investment-recommendations';
 import PortfolioOverview from '@/components/investments/portfolio-overview';
+import { useToast } from '@/hooks/use-toast';
+
+// Stale threshold: 6 hours
+const STALE_THRESHOLD_MS = 6 * 60 * 60 * 1000;
+
+// USD to INR conversion rate (approximate, can be fetched from API in future)
+// As of 2026, approximate rate
+const USD_TO_INR = 83.5;
+
+// Check if symbol is a US stock (needs currency conversion)
+// Indian stocks typically have .NS (NSE) or .BO (BSE) suffix
+function isUSStock(symbol: string): boolean {
+  const upperSymbol = symbol.toUpperCase();
+  return !upperSymbol.endsWith('.NS') && !upperSymbol.endsWith('.BO');
+}
+
+// Quote response types
+interface QuoteResult {
+  symbol: string;
+  price?: number;
+  timestamp?: string;
+  error?: string;
+}
+
+interface QuotesResponse {
+  source: string;
+  fetchedAt: string;
+  quotes: QuoteResult[];
+}
 
 export default function InvestmentsPage() {
   const { profile, updateInvestments, updateSIPPlans, deleteInvestment, deleteSIPPlan } = useApp();
   const [showInvestmentDialog, setShowInvestmentDialog] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { toast } = useToast();
 
   // Derive investments and SIP plans from profile
   const investments = profile?.investments || [];
   const sipPlans = profile?.sipPlans || [];
+
+  // Get stock investments
+  const stockInvestments = useMemo(() =>
+    investments.filter(inv => inv.type === 'Stock' && inv.symbol),
+    [investments]
+  );
+
+  // Check if any stock is stale
+  const hasStaleStocks = useMemo(() => {
+    if (stockInvestments.length === 0) return false;
+    const now = Date.now();
+    return stockInvestments.some(inv => {
+      if (!inv.lastPriceFetchedAt) return true;
+      const lastFetch = new Date(inv.lastPriceFetchedAt).getTime();
+      return (now - lastFetch) > STALE_THRESHOLD_MS;
+    });
+  }, [stockInvestments]);
+
+  // Refresh stock prices
+  const refreshPrices = useCallback(async () => {
+    if (stockInvestments.length === 0) {
+      toast({
+        title: 'No stocks to refresh',
+        description: 'Add stock investments with ticker symbols to enable price refresh.',
+      });
+      return;
+    }
+
+    setIsRefreshing(true);
+
+    try {
+      const symbols = [...new Set(stockInvestments.map(inv => inv.symbol!))];
+      const response = await fetch(`/api/quotes?symbols=${symbols.join(',')}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch quotes');
+      }
+
+      const data: QuotesResponse = await response.json();
+      const quoteMap = new Map<string, QuoteResult>();
+      data.quotes.forEach(q => quoteMap.set(q.symbol.toUpperCase(), q));
+
+      const now = new Date().toISOString();
+      let successCount = 0;
+      let errorCount = 0;
+
+      const updatedInvestments = investments.map(inv => {
+        if (inv.type !== 'Stock' || !inv.symbol) return inv;
+
+        const quote = quoteMap.get(inv.symbol.toUpperCase());
+        if (!quote) return inv;
+
+        if (quote.error) {
+          errorCount++;
+          return { ...inv, quoteError: quote.error };
+        }
+
+        if (quote.price !== undefined && inv.quantity) {
+          successCount++;
+          const priceInINR = isUSStock(inv.symbol!) ? quote.price * USD_TO_INR : quote.price;
+
+          return {
+            ...inv,
+            currentPrice: priceInINR,
+            currentValue: priceInINR * inv.quantity,
+            lastPriceFetchedAt: now,
+            priceSource: data.source,
+            quoteError: undefined,
+          };
+        }
+
+        return inv;
+      });
+
+      await updateInvestments(updatedInvestments);
+
+      if (errorCount === 0) {
+        toast({
+          title: 'Prices updated',
+          description: `Successfully updated ${successCount} holdings.`,
+        });
+      } else {
+        toast({
+          title: 'Partial update',
+          description: `Updated ${successCount}/${stockInvestments.length} holdings. ${errorCount} failed.`,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to refresh prices:', error);
+      toast({
+        title: 'Refresh failed',
+        description: 'Could not fetch latest prices. Using cached data.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [stockInvestments, investments, updateInvestments, toast]);
+
+  // Auto-refresh on mount if stale
+  useEffect(() => {
+    if (hasStaleStocks && !isRefreshing) {
+      refreshPrices();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { portfolioValue, portfolioGain, gainPercentage } = useMemo(() => {
     const totalInvested = investments.reduce((sum, inv) => sum + inv.purchaseAmount, 0);
@@ -44,7 +182,7 @@ export default function InvestmentsPage() {
     await updateSIPPlans([...sipPlans, plan]);
   };
 
-  if (profile === undefined) {
+  if (!profile) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center space-y-2">
@@ -62,10 +200,23 @@ export default function InvestmentsPage() {
           <h1 className="text-3xl font-bold">Investments & Wealth</h1>
           <p className="text-muted-foreground">Track and grow your portfolio with AI-powered insights</p>
         </div>
-        <Button onClick={() => setShowInvestmentDialog(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Add Investment
-        </Button>
+        <div className="flex gap-2">
+          {stockInvestments.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={refreshPrices}
+              disabled={isRefreshing}
+              className="gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh Prices'}
+            </Button>
+          )}
+          <Button onClick={() => setShowInvestmentDialog(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Add Investment
+          </Button>
+        </div>
       </div>
 
       <Alert className="bg-primary/5 border-primary/20">

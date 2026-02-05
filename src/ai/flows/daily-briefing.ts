@@ -15,6 +15,11 @@ const DailyBriefingInputSchema = z.object({
     dayOfWeek: z.string().describe("Current day of the week (e.g., 'Sunday')"),
     daysLeftInMonth: z.number().describe("Days remaining in the current month"),
     remainingMonthlyBudget: z.number().describe("Remaining budget for the month"),
+    todaysTransactions: z.array(z.object({
+        amount: z.number(),
+        category: z.string(),
+        description: z.string(),
+    })).describe("List of transactions made today"),
     recentTransactions: z.array(z.object({
         amount: z.number(),
         category: z.string(),
@@ -22,6 +27,9 @@ const DailyBriefingInputSchema = z.object({
         dayOfWeek: z.string(),
     })).describe('Last 30 days of transactions with day information'),
     runOutDate: z.string().optional().describe("Pre-calculated date when budget will run out if overspending"),
+    essentialExpensesLogged: z.number().describe("Total essential expenses logged this month"),
+    discretionaryExpensesLogged: z.number().describe("Total discretionary expenses logged this month"),
+    savingsGoal: z.number().describe("Monthly savings goal"),
 });
 export type DailyBriefingInput = z.infer<typeof DailyBriefingInputSchema>;
 
@@ -31,7 +39,7 @@ const DailyBriefingOutputSchema = z.object({
     warningMessage: z.string().optional().describe('Emergency alert if user is on track to overspend'),
     behaviorNudge: z.string().optional().describe('Pattern-based reminder for typical spending on this day'),
     mainMessage: z.string().describe('The main one-liner decision message'),
-    reasoning: z.string().describe('A short explanation of WHY this suggestion was made, citing specific spending patterns and numbers from the user data'),
+    reasoning: z.string().describe('A detailed explanation of the daily status. If they spent today, break down WHERE it went and how much is left. If they haven\'t spent, explain the goal for today based on history.'),
 });
 export type DailyBriefingOutput = z.infer<typeof DailyBriefingOutputSchema>;
 
@@ -45,35 +53,36 @@ const prompt = ai.definePrompt({
     output: { schema: DailyBriefingOutputSchema },
     model: 'googleai/gemini-2.0-flash',
     prompt: `
-            Role: You are a hyper-concise, proactive financial assistant (Finmate).
-            Goal: Give the user ONE clear number to focus on today and ONE behavior to watch.
+            Role: You are Finmate, a precise financial status analyser.
+            Goal: Provide a deeply accurate "Daily Status" based ONLY on real logs and the safe spending limit formula.
 
-            Data:
+            User Context:
             - Monthly Income: ₹{{income}}
-            - Daily Limit: ₹{{dailySpendingLimit}}
-            - Already Spent Today: ₹{{todaysSpending}}
-            - Days Left in Month: {{daysLeftInMonth}}
-            - Remaining Monthly Budget: ₹{{remainingMonthlyBudget}}
-            - Recent Transactions: {{json recentTransactions}}
-            {{#if runOutDate}}
-            - Budget Run Out Date: {{runOutDate}}
-            {{/if}}
+            - Monthly Savings Goal: ₹{{savingsGoal}}
+            - Essential Expenses Logged (this month): ₹{{essentialExpensesLogged}}
+            - Discretionary Expenses Logged (this month): ₹{{discretionaryExpensesLogged}}
+            - Today's Transactions: {{json todaysTransactions}}
+            - Days Remaining (current month): {{daysLeftInMonth}}
+            - History: {{json recentTransactions}}
 
-            ## Your Task:
+            ## Strict Rules:
+            1. Use ONLY real data. No assumptions.
+            2. Remaining Disposable = Income - Essential Logged - Discretionary Logged - Savings Goal.
+            3. Safe Daily Limit = Remaining Disposable / Days Remaining.
+            4. If Remaining Disposable <= 0, Safe Daily Limit is ₹0.
 
-            1. **Calculate spendableToday**: dailySpendingLimit - todaysSpending (but never negative)
+            ## Task:
+            1. **Summarize Today**: State specifically what was spent today and in which categories.
+            2. **Calculate Status**: Use the formula above to determine the real safe daily limit.
+            3. **Behavioral Insight**: Briefly mention if today's {{dayOfWeek}} spending is higher or lower than their typical {{dayOfWeek}} history.
+            4. **Explain Context**: In the reasoning, show the numbers: "Income (₹{{income}}) - Expenses Logged - Savings Goal leaves ₹X for the rest of the month."
 
-            2. **Find avoidCategory**: Look at the transactions. Which category has the highest total spending? That's the category to suggest avoiding. If no clear pattern, leave empty.
+            ## Output Format:
+            - mainMessage: Concise status of today vs the calculated Safe Daily Limit.
+            - reasoning: 2-3 sentences explaining the formula result and today's impact. Use numbers clearly.
+            - behaviorNudge: Pattern-based insight for {{dayOfWeek}}.
 
-            3. **Generate warningMessage**: check provided runOutDate. If it exists, use it: "At this rate, you'll run out by {{runOutDate}}". Else, calculate based on average spending speed. Leave empty if on track.
-
-4. **Create behaviorNudge**: Look at transactions from the same dayOfWeek. Calculate average spending for this day. Format: "You usually spend ₹X on [top category] on {{{dayOfWeek}}}s". Leave empty if less than 3 transactions on this day.
-
-5. **Compose mainMessage**: A single, clean one-liner showing ONLY the remaining budget. Format: "You can spend ₹[spendableToday] today." Do NOT include what to avoid in this message - keep it simple.
-
-6. **Write reasoning**: Explain WHY you made this suggestion in 2-3 sentences. Cite specific numbers from their spending history. If avoidCategory exists, include advice to avoid that category here. Example: "You've spent ₹2,400 on Food this week, which is 40% above your usual. Consider skipping Food today - your Sunday Food spending averages ₹350."
-
-Be concise, friendly, and actionable. All amounts in Indian Rupees (₹).`,
+            All amounts in Indian Rupees (₹). No motivational talk.`,
 });
 
 const dailyBriefingFlow = ai.defineFlow(
@@ -83,30 +92,46 @@ const dailyBriefingFlow = ai.defineFlow(
         outputSchema: DailyBriefingOutputSchema,
     },
     async (input) => {
+        const calculateSafeLimitForToday = (inp: typeof input) => {
+            // 1. Calculate how much is actually left for the rest of the month (Dynamic Budget)
+            const remainingDisposable = inp.income - inp.essentialExpensesLogged - inp.discretionaryExpensesLogged - inp.savingsGoal;
+            const dynamicDailyLimit = Math.max(0, remainingDisposable / inp.daysLeftInMonth);
+            
+            // 2. Calculate today's remaining allowance based on the profile's Daily Limit
+            const dailyLimitRemaining = Math.max(0, inp.dailySpendingLimit - inp.todaysSpending);
+            
+            // 3. The 'Safe Limit' for TODAY is capped by your daily quota, 
+            //    but can be lower if you are overspent for the month.
+            return Math.min(dailyLimitRemaining, dynamicDailyLimit);
+        };
+
         try {
-            // Calculate spendable amount locally for accuracy
-            const spendableToday = Math.max(0, input.dailySpendingLimit - input.todaysSpending);
+            const spendableToday = calculateSafeLimitForToday(input);
 
             const { output } = await prompt(input);
             if (!output) {
                 return {
                     spendableToday,
-                    mainMessage: `You can spend ₹${spendableToday.toFixed(0)} today.`,
-                    reasoning: 'Based on your daily spending limit.',
+                    mainMessage: spendableToday > 0 
+                        ? `You have ₹${spendableToday.toFixed(0)} left for today.` 
+                        : `You've reached your limit for today.`,
+                    reasoning: `Based on your daily limit of ₹${input.dailySpendingLimit}.`,
                 };
             }
 
             return {
                 ...output,
-                spendableToday, // Override with accurate local calculation
+                spendableToday, 
             };
         } catch (error) {
             console.error('Error in dailyBriefingFlow:', error);
-            const spendableToday = Math.max(0, input.dailySpendingLimit - input.todaysSpending);
+            const spendableToday = calculateSafeLimitForToday(input);
             return {
                 spendableToday,
-                mainMessage: `You can spend ₹${spendableToday.toFixed(0)} today.`,
-                reasoning: 'Based on your daily spending limit.',
+                mainMessage: spendableToday > 0 
+                  ? `You have ₹${spendableToday.toFixed(0)} left for today.` 
+                  : `You've reached your limit for today.`,
+                reasoning: `Based on your daily limit of ₹${input.dailySpendingLimit}.`,
             };
         }
     }

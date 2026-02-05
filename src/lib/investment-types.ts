@@ -15,6 +15,9 @@ export interface Investment {
   status: InvestmentStatus;
   notes?: string;
   symbol?: string; // Stock ticker or fund code
+  lastPriceFetchedAt?: string; // ISO string
+  priceSource?: string; // e.g. 'Yahoo Finance'
+  quoteError?: string; // Error message if price fetch failed
 }
 
 export interface SIPPlan {

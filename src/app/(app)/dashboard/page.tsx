@@ -8,9 +8,7 @@ import { IndianRupee, Target, TrendingUp, TrendingDown, PiggyBank, Wallet, Shopp
 import Link from 'next/link';
 import { useApp } from '@/hooks/use-app';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { SpendingForecast } from '@/components/spending-forecast';
 import { SmartDailyBriefing } from '@/components/ui/smart-daily-briefing';
-import { RecentAchievements } from '@/components/ui/recent-achievements';
 import { TdsAllocationDialog } from '@/components/total-daily-savings';
 import { isLastDayOfMonth } from 'date-fns';
 
@@ -103,7 +101,6 @@ export default function DashboardPage() {
 
       <SmartDailyBriefing />
 
-      <RecentAchievements />
 
       <div className="grid gap-6 md:grid-cols-3">
         <StatCard
@@ -199,52 +196,46 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
-        <Card className="lg:col-span-2 shadow-sm">
-          <CardHeader>
-            <CardTitle>Financial Breakdown</CardTitle>
-            <CardDescription>Monthly budget allocation across Needs, Wants, and Savings.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="p-4 rounded-xl bg-muted/20 border border-border/50 flex flex-col items-center">
-                <Wallet className="h-5 w-5 text-primary mb-2 opacity-80" />
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Needs</p>
-                <p className="text-xl font-bold">₹{monthlyNeeds.toFixed(0)}</p>
-              </div>
-              <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10 flex flex-col items-center">
-                <ShoppingCart className="h-5 w-5 text-orange-500 mb-2 opacity-80" />
-                <p className="text-[10px] uppercase font-bold text-orange-500/70 tracking-widest">Wants</p>
-                <p className="text-xl font-bold">₹{monthlyWants.toFixed(0)}</p>
-              </div>
-              <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/10 flex flex-col items-center">
-                <PiggyBank className="h-5 w-5 text-green-600 mb-2 opacity-80" />
-                <p className="text-[10px] uppercase font-bold text-green-600/70 tracking-widest">Savings</p>
-                <p className="text-xl font-bold">₹{monthlySavings.toFixed(0)}</p>
-              </div>
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle>Financial Breakdown</CardTitle>
+          <CardDescription>Monthly budget allocation across Needs, Wants, and Savings.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="p-4 rounded-xl bg-muted/20 border border-border/50 flex flex-col items-center">
+              <Wallet className="h-5 w-5 text-primary mb-2 opacity-80" />
+              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Needs</p>
+              <p className="text-xl font-bold">₹{monthlyNeeds.toFixed(0)}</p>
             </div>
-
-            <div className="space-y-3 pt-4 border-t">
-              <div className="flex justify-between items-center text-sm">
-                <span className="flex items-center gap-2 text-muted-foreground"><Target className="h-4 w-4" /> Committed to Goals</span>
-                <span className="font-semibold">₹{goalContributions.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="flex items-center gap-2 text-muted-foreground"><ShieldCheck className="h-4 w-4" /> Available for Buffer</span>
-                <span className="font-semibold">₹{Math.max(0, monthlySavings - goalContributions).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between items-center text-base font-bold pt-2 border-t">
-                <span>Total Savings Target</span>
-                <span>₹{monthlySavings.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
+            <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10 flex flex-col items-center">
+              <ShoppingCart className="h-5 w-5 text-orange-500 mb-2 opacity-80" />
+              <p className="text-[10px] uppercase font-bold text-orange-500/70 tracking-widest">Wants</p>
+              <p className="text-xl font-bold">₹{monthlyWants.toFixed(0)}</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/10 flex flex-col items-center">
+              <PiggyBank className="h-5 w-5 text-green-600 mb-2 opacity-80" />
+              <p className="text-[10px] uppercase font-bold text-green-600/70 tracking-widest">Savings</p>
+              <p className="text-xl font-bold">₹{monthlySavings.toFixed(0)}</p>
+            </div>
+          </div>
 
-        <div className="flex flex-col gap-6">
-          <SpendingForecast />
-        </div>
-      </div>
+          <div className="space-y-3 pt-4 border-t">
+            <div className="flex justify-between items-center text-sm">
+              <span className="flex items-center gap-2 text-muted-foreground"><Target className="h-4 w-4" /> Committed to Goals</span>
+              <span className="font-semibold">₹{goalContributions.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="flex items-center gap-2 text-muted-foreground"><ShieldCheck className="h-4 w-4" /> Available for Buffer</span>
+              <span className="font-semibold">₹{Math.max(0, monthlySavings - goalContributions).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div className="flex justify-between items-center text-base font-bold pt-2 border-t">
+              <span>Total Savings Target</span>
+              <span>₹{monthlySavings.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="h-full shadow-sm">

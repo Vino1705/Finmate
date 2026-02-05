@@ -8,7 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Bot, Goal, BarChart, Wallet, PiggyBank, TrendingUp, PieChart, ShieldCheck } from "lucide-react";
+import { CheckCircle, Bot, Goal, BarChart, Wallet, PiggyBank, TrendingUp, PieChart, ShieldCheck, Target } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/logo";
 import { placeholderImages } from "@/lib/placeholder-images";
@@ -18,23 +18,23 @@ const heroImage = placeholderImages.find((p) => p.id === "hero-image");
 const features = [
   {
     icon: <Bot className="h-10 w-10 text-primary" />,
-    title: "AI 'Magic' SMS Parser",
-    description: "Just paste your bank SMS. Our AI instantly extracts the amount, category, and vendor for effortless tracking.",
+    title: "AI Finance Assistant",
+    description: "Chat with our AI to get instant answers about your finances. Ask 'Can I afford this?' and get personalized, real-time advice.",
   },
   {
     icon: <TrendingUp className="h-10 w-10 text-primary" />,
-    title: "Investment Simulator",
-    description: "Visualize how small daily savings grow into massive wealth over time with our AI-powered Nifty 50 simulator.",
+    title: "Real-Time Portfolio Tracker",
+    description: "Track your stock investments with live price updates. Monitor gains, losses, and build long-term wealth with actionable insights.",
+  },
+  {
+    icon: <Target className="h-10 w-10 text-primary" />,
+    title: "Smart Goal Tracking",
+    description: "Set savings goals with smart auto-calculation. Track progress, contribute funds, and visualize your journey to financial milestones.",
   },
   {
     icon: <PieChart className="h-10 w-10 text-primary" />,
-    title: "Guilt-Free Spending",
-    description: "Know exactly how much you can spend on treats today without hurting your long-term financial goals.",
-  },
-  {
-    icon: <ShieldCheck className="h-10 w-10 text-primary" />,
-    title: "Proactive Nudges",
-    description: "Receive gentle AI alerts when you're trending over-budget or when it's time to set aside your savings.",
+    title: "AI Spending Forecast",
+    description: "Get AI-powered predictions on your spending patterns. Receive personalized daily limits and proactive suggestions to stay on track.",
   },
 ];
 
