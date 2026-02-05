@@ -15,6 +15,7 @@ type MicRecorderProps = {
 export function MicRecorder({ onResult, targetForm = 'onboarding', imageSrc, imageAlt }: MicRecorderProps) {
   const [recording, setRecording] = React.useState(false);
   const [transcript, setTranscript] = React.useState<string>('');
+  const [processing, setProcessing] = React.useState(false);
   const mediaRef = React.useRef<MediaRecorder | null>(null);
   const chunksRef = React.useRef<Blob[]>([]);
 
@@ -26,29 +27,54 @@ export function MicRecorder({ onResult, targetForm = 'onboarding', imageSrc, ima
       chunksRef.current = [];
       mr.ondataavailable = (e) => chunksRef.current.push(e.data);
       mr.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const arrayBuffer = await blob.arrayBuffer();
-        const base64 = bufferToBase64(arrayBuffer);
+        setProcessing(true);
+        setTranscript('Processing audio...');
+        try {
+          const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+          const arrayBuffer = await blob.arrayBuffer();
+          const base64 = bufferToBase64(arrayBuffer);
 
-        // send to speech-to-text
-        const { getApiUrl } = await import('@/lib/utils');
-        const sttRes = await fetch(getApiUrl('api/speech-to-text'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ audio: base64, mimeType: 'audio/webm' }),
-        });
-        const sttJson = await sttRes.json();
-        setTranscript(sttJson?.text ?? '');
+          // send to speech-to-text
+          const { getApiUrl } = await import('@/lib/utils');
+          const sttRes = await fetch(getApiUrl('api/speech-to-text'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audio: base64, mimeType: 'audio/webm' }),
+          });
 
-        // parse fields
-        const parseRes = await fetch(getApiUrl('api/parse-fields'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: sttJson?.text ?? '', targetForm }),
-        });
-        const parseJson = await parseRes.json();
+          if (!sttRes.ok) throw new Error('Speech recognition failed');
 
-        onResult({ text: sttJson?.text, parsed: parseJson?.parsed ?? null });
+          const sttJson = await sttRes.json();
+          const text = (sttJson?.text ?? '').trim();
+
+          if (!text) {
+            setTranscript('No speech detected. Try again.');
+            setProcessing(false);
+            return;
+          }
+
+          setTranscript(text);
+          setTranscript('Parsing details...');
+
+          // parse fields
+          const parseRes = await fetch(getApiUrl('api/parse-fields'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, targetForm }),
+          });
+
+          if (!parseRes.ok) throw new Error('Failed to parse details');
+
+          const parseJson = await parseRes.json();
+          setTranscript(text); // Restore the actual text
+
+          onResult({ text, parsed: parseJson?.parsed ?? null });
+        } catch (err) {
+          console.error('mic processing error', err);
+          setTranscript('Error processing voice. Try again.');
+        } finally {
+          setProcessing(false);
+        }
       };
       mr.start();
       setRecording(true);
@@ -81,8 +107,8 @@ export function MicRecorder({ onResult, targetForm = 'onboarding', imageSrc, ima
         onClick={() => (recording ? stop() : start())}
         aria-pressed={recording}
         className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full shadow-sm border transition-colors ${recording
-            ? 'bg-destructive text-destructive-foreground border-destructive'
-            : 'bg-background text-foreground hover:bg-accent'
+          ? 'bg-destructive text-destructive-foreground border-destructive'
+          : 'bg-background text-foreground hover:bg-accent'
           }`}
       >
         {/** Use provided imageSrc, otherwise fall back to bundled image.png. If not present show SVG. */}

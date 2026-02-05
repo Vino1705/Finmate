@@ -13,10 +13,9 @@ export function getApiUrl(path: string): string {
     path = path.substring(1);
   }
 
-  // Check if we are in a browser and running on localhost
+  // In browser, if we are on http/https, use relative paths to avoid CORS/Fetch errors
   if (typeof window !== 'undefined') {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocal) {
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
       return `/${path}`;
     }
   }

@@ -134,7 +134,7 @@ export default function CheckInPage() {
                   <MicRecorder
                     targetForm="expense"
                     onResult={({ text, parsed }) => {
-                      if (parsed && parsed.description && parsed.amount) {
+                      if (parsed && parsed.description && (parsed.amount || parsed.amount === 0)) {
                         const cat = parsed.categoryNormalized || parsed.category || 'Other';
                         addTransaction({
                           description: parsed.description,
@@ -144,6 +144,12 @@ export default function CheckInPage() {
                         });
                         toast({ title: 'Expense added from voice', description: `${parsed.description} — ${cat}` });
                         form.reset({ amount: 0, category: '', description: '', date: watchedDate });
+                      } else {
+                        toast({
+                          variant: "destructive",
+                          title: "Voice capture failed",
+                          description: "We couldn't extract the amount or description. Please try again.",
+                        });
                       }
                     }}
                   />
@@ -152,7 +158,7 @@ export default function CheckInPage() {
                 <OcrUploader
                   targetForm="expense"
                   onResult={({ text, parsed }) => {
-                    if (parsed && parsed.description && parsed.amount) {
+                    if (parsed && parsed.description && (parsed.amount || parsed.amount === 0)) {
                       const cat = parsed.categoryNormalized || parsed.category || 'Other';
                       addTransaction({
                         description: parsed.description,
@@ -162,6 +168,12 @@ export default function CheckInPage() {
                       });
                       toast({ title: 'Expense added from image', description: `${parsed.description} — ${cat}` });
                       form.reset({ amount: 0, category: '', description: '', date: watchedDate });
+                    } else {
+                      toast({
+                        variant: "destructive",
+                        title: "OCR failed",
+                        description: "Could not read the receipt details. Try a clearer photo.",
+                      });
                     }
                   }}
                 />
