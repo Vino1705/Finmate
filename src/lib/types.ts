@@ -19,11 +19,13 @@ export interface UserProfile {
     currentStreak: number;
     longestStreak: number;
     lastStreakDate: string | null;
+    lastBadgeCheckDate?: string | null;
   };
   investments?: import('./investment-types').Investment[];
   sipPlans?: import('./investment-types').SIPPlan[];
   totalDailySavings?: number; // Current balance (optional if we use derived)
   lastTdsResetDate?: string; // ISO string
+  reminderTime?: string; // HH:mm format
 }
 
 export interface FixedExpense {

@@ -231,10 +231,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
 
     try {
+      // Force date to current time to prevent back-dating or tampering with streaks
       const newTransaction: Transaction = {
         ...transactionData,
         id: crypto.randomUUID(),
-        date: (transactionData as any).date || formatISO(new Date()),
+        date: formatISO(new Date()),
       };
 
       await FirestoreService.saveTransaction(user.uid, newTransaction);
@@ -852,7 +853,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     // Update last check date
     const updatedGamification = {
-      ...profile.gamification,
+      ...(profile.gamification || DEFAULT_GAMIFICATION_STATE),
       lastBadgeCheckDate: formatISO(new Date()),
     };
 

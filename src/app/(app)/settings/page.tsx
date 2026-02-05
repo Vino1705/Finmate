@@ -35,6 +35,7 @@ const profileSchema = z.object({
     role: z.enum(['Student', 'Professional', 'Housewife']),
     income: z.coerce.number().min(0, 'Income cannot be negative'),
     fixedExpenses: z.array(fixedExpenseSchema).optional(),
+    reminderTime: z.string().optional(),
 });
 
 type ProfileValues = z.infer<typeof profileSchema>;
@@ -51,6 +52,7 @@ export default function SettingsPage() {
             role: profile?.role || 'Professional',
             income: profile?.income || 0,
             fixedExpenses: profile?.fixedExpenses || [],
+            reminderTime: profile?.reminderTime || '20:00',
         },
     });
 
@@ -70,6 +72,7 @@ export default function SettingsPage() {
                 role: mappedRole,
                 income: profile.income,
                 fixedExpenses: profile.fixedExpenses.map(exp => ({ ...exp, timelineMonths: exp.timelineMonths || null })),
+                reminderTime: profile.reminderTime || '20:00',
             });
         }
     }, [profile, form]);
@@ -78,7 +81,7 @@ export default function SettingsPage() {
         updateProfile(data as any);
         toast({
             title: "Profile Updated",
-            description: "Your financial details have been successfully updated.",
+            description: "Your settings have been successfully updated.",
         })
         router.push('/dashboard');
     }
@@ -93,7 +96,7 @@ export default function SettingsPage() {
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <FormField
                                     control={form.control}
                                     name="role"
@@ -125,6 +128,20 @@ export default function SettingsPage() {
                                             <FormControl>
                                                 <Input type="number" placeholder="e.g., 50000" {...field} />
                                             </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="reminderTime"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Reminder Alarm (Daily)</FormLabel>
+                                            <FormControl>
+                                                <Input type="time" {...field} />
+                                            </FormControl>
+                                            <CardDescription className="text-[10px]">Set a time for your daily check-in reminder.</CardDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}

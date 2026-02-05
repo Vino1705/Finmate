@@ -21,6 +21,7 @@ import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, S
 import { DashboardHeader } from '@/components/dashboard-header';
 import Chatbot from '@/components/chatbot';
 import { Logo } from '@/components/logo';
+import ReminderSystem from '@/components/reminder-system';
 
 const navItems = [
   { href: '/dashboard', icon: <LayoutGrid />, label: 'Dashboard' },
@@ -142,6 +143,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </main>
           </SidebarInset>
         </div>
+        <ReminderSystem />
         <Chatbot />
       </div>
     </SidebarProvider>

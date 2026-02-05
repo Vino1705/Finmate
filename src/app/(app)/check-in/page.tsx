@@ -125,7 +125,7 @@ export default function CheckInPage() {
         <Card className="lg:col-span-1 border-primary/20">
           <CardHeader>
             <CardTitle>Log Expense</CardTitle>
-            <CardDescription>Logging for {format(parseISO(watchedDate), "PPP")}</CardDescription>
+            <CardDescription>Logging for {format(new Date(), "PPP")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-4">
@@ -140,10 +140,10 @@ export default function CheckInPage() {
                           description: parsed.description,
                           amount: Number(parsed.amount),
                           category: cat,
-                          date: watchedDate,
+                          date: new Date().toISOString(),
                         });
                         toast({ title: 'Expense added from voice', description: `${parsed.description} — ${cat}` });
-                        form.reset({ amount: 0, category: '', description: '', date: watchedDate });
+                        form.reset({ amount: 0, category: '', description: '' });
                       } else {
                         toast({
                           variant: "destructive",
@@ -164,10 +164,10 @@ export default function CheckInPage() {
                         description: parsed.description,
                         amount: Number(parsed.amount),
                         category: cat,
-                        date: watchedDate,
+                        date: new Date().toISOString(),
                       });
                       toast({ title: 'Expense added from image', description: `${parsed.description} — ${cat}` });
-                      form.reset({ amount: 0, category: '', description: '', date: watchedDate });
+                      form.reset({ amount: 0, category: '', description: '' });
                     } else {
                       toast({
                         variant: "destructive",
@@ -188,47 +188,6 @@ export default function CheckInPage() {
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Transaction Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(parseISO(field.value), "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value ? parseISO(field.value) : undefined}
-                            onSelect={(date) => field.onChange(date?.toISOString())}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="description"
