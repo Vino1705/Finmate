@@ -41,7 +41,7 @@ const prompt = ai.definePrompt({
   name: 'spendingAlertsPrompt',
   input: { schema: SpendingAlertsInputSchema },
   output: { schema: SpendingAlertsOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-2.5-flash',
   prompt: `You are FinMate's proactive financial analyst. Your job is to analyze a user's spending habits and provide a concise, actionable suggestion for the next week.
 
 ## User's Financial Profile:

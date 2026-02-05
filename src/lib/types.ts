@@ -22,6 +22,8 @@ export interface UserProfile {
   };
   investments?: import('./investment-types').Investment[];
   sipPlans?: import('./investment-types').SIPPlan[];
+  totalDailySavings?: number; // Current balance (optional if we use derived)
+  lastTdsResetDate?: string; // ISO string
 }
 
 export interface FixedExpense {

@@ -7,7 +7,7 @@ import { signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { FirestoreService } from '@/lib/firestore';
 import { useRouter } from 'next/navigation';
-import { format, formatISO, startOfDay, parseISO, subDays, isAfter, isSameDay } from 'date-fns';
+import { format, formatISO, startOfDay, parseISO, subDays, isAfter, isSameDay, isBefore, addDays, startOfMonth } from 'date-fns';
 import { BADGES, Badge, DEFAULT_GAMIFICATION_STATE, checkBadgeEligibility, BadgeCheckContext } from '@/lib/gamification';
 import { calculateRoleBudget } from '@/lib/utils';
 
@@ -44,6 +44,7 @@ interface AppContextType {
   deleteInvestment: (investmentId: string) => Promise<void>;
   updateSIPPlans: (plans: import('@/lib/investment-types').SIPPlan[]) => Promise<void>;
   deleteSIPPlan: (planId: string) => Promise<void>;
+  allocateTds: (allocation: { emergencyFund: number, goals: { goalId: string, amount: number }[] }) => Promise<void>;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -327,13 +328,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, [goals]);
 
   const getCumulativeDailySavings = useCallback(() => {
-    if (!profile || transactions.length === 0) {
+    if (!profile) {
       return 0;
     }
 
+    // 1. Get last reset date - default to start of current month to avoid 1970 bug
+    const lastResetDateStr = profile.lastTdsResetDate;
+    const lastResetDate = lastResetDateStr ? parseISO(lastResetDateStr) : startOfMonth(new Date());
+
+    // 2. Group expenses by day
     const spendingByDay = transactions
       .reduce((acc, t) => {
-        const day = startOfDay(parseISO(t.date)).toISOString();
+        const tDate = parseISO(t.date);
+        if (isBefore(tDate, lastResetDate) && !isSameDay(tDate, lastResetDate)) {
+          return acc;
+        }
+
+        const day = startOfDay(tDate).toISOString();
         if (!acc[day]) {
           acc[day] = 0;
         }
@@ -343,18 +354,47 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const today = startOfDay(new Date()).toISOString();
 
-    let cumulativeSavings = 0;
-    for (const day in spendingByDay) {
-      if (day !== today) {
-        const spending = spendingByDay[day];
-        const saving = profile.dailySpendingLimit - spending;
-        if (saving > 0) {
-          cumulativeSavings += saving;
+    // 3. Get all days that have transactions OR are between lastResetDate and yesterday
+    const daysToProcess: string[] = [];
+    let current = startOfDay(lastResetDate);
+    const yesterday = startOfDay(subDays(new Date(), 1));
+
+    while (current <= yesterday) {
+      daysToProcess.push(current.toISOString());
+      current = addDays(current, 1);
+    }
+
+    // Also include today if there's spending
+    if (spendingByDay[today] !== undefined) {
+      daysToProcess.push(today);
+    }
+
+    // Sort unique days
+    const allDays = Array.from(new Set([...daysToProcess, ...Object.keys(spendingByDay)]))
+      .sort((a, b) => a.localeCompare(b));
+
+    let balance = profile.totalDailySavings || 0;
+    for (const day of allDays) {
+      const spending = spendingByDay[day] || 0;
+      const diff = profile.dailySpendingLimit - spending;
+
+      if (day === today) {
+        // Requirement 3 & 5: Only deduct overspending for today
+        if (diff < 0) {
+          balance += diff;
         }
+      } else {
+        // Past days: add savings or deduct overspending
+        balance += diff;
+      }
+
+      // Requirement 7: TDS never becomes negative
+      if (balance < 0) {
+        balance = 0;
       }
     }
 
-    return cumulativeSavings;
+    return balance;
   }, [profile, transactions]);
 
   const contributeToGoal = (goalId: string, amount: number) => {
@@ -524,6 +564,82 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const updatedPlans = profile.sipPlans.filter(p => p.id !== planId);
     await updateSIPPlans(updatedPlans);
     toast({ title: 'SIP Plan removed.' });
+  };
+
+  const allocateTds = async (allocation: { emergencyFund: number, goals: { goalId: string, amount: number }[] }) => {
+    if (!user || !profile) return;
+
+    try {
+      // 1. Update goals with contributions
+      if (allocation.goals.length > 0) {
+        const updatedGoals = goals.map(goal => {
+          const goalAllocation = allocation.goals.find(a => a.goalId === goal.id);
+          if (goalAllocation) {
+            const newContribution: Contribution = {
+              amount: goalAllocation.amount,
+              date: formatISO(new Date()),
+            };
+            const newCurrentAmount = goal.currentAmount + goalAllocation.amount;
+            return {
+              ...goal,
+              currentAmount: newCurrentAmount > goal.targetAmount ? goal.targetAmount : newCurrentAmount,
+              contributions: [newContribution, ...(goal.contributions || [])],
+            };
+          }
+          return goal;
+        });
+
+        // Save goals to Firestore
+        await Promise.all(allocation.goals.map(async (a) => {
+          const goal = updatedGoals.find(g => g.id === a.goalId);
+          if (goal) await FirestoreService.saveGoal(user.uid, goal);
+        }));
+        setGoals(updatedGoals);
+      }
+
+      const currentTdsBalance = getCumulativeDailySavings();
+      const totalAmountAllocated = allocation.emergencyFund + allocation.goals.reduce((sum, g) => sum + g.amount, 0);
+      const remainingTds = Math.max(0, currentTdsBalance - totalAmountAllocated);
+
+      // 2. Prepare updated profile
+      const updatedProfile: UserProfile = {
+        ...profile,
+        lastTdsResetDate: formatISO(new Date()),
+        totalDailySavings: remainingTds,
+      };
+
+      // 3. Update emergency fund if allocated
+      if (allocation.emergencyFund > 0) {
+        const newEntry: EmergencyFundEntry = {
+          id: Date.now().toString(),
+          amount: allocation.emergencyFund,
+          date: formatISO(new Date()),
+          type: 'deposit',
+          notes: 'Allocation from Total Daily Savings',
+        };
+
+        updatedProfile.emergencyFund = {
+          ...profile.emergencyFund,
+          current: profile.emergencyFund.current + allocation.emergencyFund,
+          history: [newEntry, ...profile.emergencyFund.history],
+        };
+      }
+
+      await FirestoreService.updateProfile(user.uid, updatedProfile);
+      setProfile(updatedProfile);
+
+      toast({
+        title: "Allocation Successful",
+        description: "Your daily savings have been allocated and reset.",
+      });
+    } catch (error) {
+      console.error("Failed to allocate TDS:", error);
+      toast({
+        title: "Error",
+        description: "Failed to allocate savings",
+        variant: "destructive"
+      });
+    }
   };
 
 
@@ -780,6 +896,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     deleteInvestment,
     updateSIPPlans,
     deleteSIPPlan,
+    allocateTds,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

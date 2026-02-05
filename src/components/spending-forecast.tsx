@@ -19,7 +19,7 @@ export function SpendingForecast() {
 
   const handleGetForecast = async () => {
     if (!profile) {
-       toast({
+      toast({
         variant: 'destructive',
         title: 'Profile Not Found',
         description: 'Please complete onboarding first.',
@@ -43,7 +43,7 @@ export function SpendingForecast() {
       const sevenDaysAgo = subDays(new Date(), 7);
       const recentTransactions = transactions.filter(t => isAfter(new Date(t.date), sevenDaysAgo));
       const averageDailySpending = recentTransactions.reduce((sum, t) => sum + t.amount, 0) / 7;
-      
+
       const suggestedLimit = Math.max(0, profile.dailySpendingLimit - (averageDailySpending - profile.dailySpendingLimit));
       const predictedLimit = `Based on your recent spending, we recommend a daily limit of around ₹${suggestedLimit.toFixed(2)} for the next week to stay on track.`;
 
@@ -80,7 +80,7 @@ export function SpendingForecast() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <BrainCircuit className="h-5 w-5 text-primary"/>
+          <BrainCircuit className="h-5 w-5 text-primary" />
           AI Spending Forecast
         </CardTitle>
         <CardDescription>Get AI-powered predictions on your future spending habits and receive proactive suggestions.</CardDescription>

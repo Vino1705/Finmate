@@ -3,7 +3,6 @@
 
 import { usePathname } from 'next/navigation';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ExportReport from '@/components/export-report';
 import { PdfExport } from '@/components/pdf-export';
 import { useApp } from '@/hooks/use-app';
@@ -22,38 +21,25 @@ const pageTitles: { [key: string]: string } = {
 
 export function DashboardHeader() {
   const pathname = usePathname();
-  const { profile, user } = useApp();
+  const { profile } = useApp();
 
-  // Always show the page title (e.g., "Dashboard Overview") in the header.
-  // This prevents showing a duplicate greeting in the header when the page
-  // content already displays a personalized greeting.
   const title = pageTitles[pathname] || 'FinMate';
-
-  const getInitials = (emailOrName: string | undefined) => {
-    if (!emailOrName) return 'U';
-    // If it's a name with spaces, use initials of first/last name
-    if (emailOrName.includes(' ')) {
-        const parts = emailOrName.split(' ');
-        return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-    }
-    // Otherwise, use the first letter (for email or single name)
-    return emailOrName.charAt(0).toUpperCase();
-  }
-  
-  const avatarIdentifier = profile?.name || user?.displayName || user?.email || 'user';
+  const firstName = profile?.name ? profile.name.split(' ')[0] : 'User';
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 lg:px-8">
       <SidebarTrigger className="md:hidden" />
       <h1 className="flex-1 text-xl font-semibold tracking-tight">{title}</h1>
-      <div className="flex items-center gap-2 mr-3">
-        <ExportReport />
-        <PdfExport />
+      <div className="flex items-center gap-4 mr-2">
+        <div className="flex items-center gap-2">
+          <ExportReport />
+          <PdfExport />
+        </div>
+        <div className="h-8 w-px bg-border mx-2 hidden md:block" />
+        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+          Hello, <span className="text-foreground">{firstName}</span>
+        </span>
       </div>
-      <Avatar>
-        <AvatarImage src={`https://avatar.vercel.sh/${avatarIdentifier}.png`} />
-        <AvatarFallback>{getInitials(avatarIdentifier)}</AvatarFallback>
-      </Avatar>
     </header>
   );
 }
