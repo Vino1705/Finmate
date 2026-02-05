@@ -57,18 +57,16 @@ IMPORTANT RULES:
 
 ## User Financial Data:
 - Total income: ₹{{totalMonthlyIncome}}
-- Daily Limit (Quota): ₹{{dailySpendingLimit}}
+- Fixed Daily Spending Limit: ₹{{dailySpendingLimit}}
 - Essential expenses (Needs) logged: ₹{{essentialExpensesLogged}}
 - Discretionary expenses (Wants) logged: ₹{{discretionaryExpensesLogged}}
 - Savings goal: ₹{{savingsGoal}}
 - Remaining days: {{remainingDaysInMonth}}
 
 ## Task:
-1. Calculate Remaining Disposable: {{totalMonthlyIncome}} - {{essentialExpensesLogged}} - {{discretionaryExpensesLogged}} - {{savingsGoal}}.
-2. Calculate Dynamic Limit: Remaining Disposable / {{remainingDaysInMonth}}.
-3. Identify SAFE DAILY LIMIT: This is the LOWER of the (Dynamic Limit) or your (Daily Limit Quota: ₹{{dailySpendingLimit}}).
-4. If the user asks about 'Today': Subtract today's specific spending from that Safe Daily Limit.
-5. If Remaining Disposable <= 0: Inform the user they have no safe spending capacity left.
+1. Identify SAFE DAILY LIMIT: This is the user's fixed daily spending limit (₹{{dailySpendingLimit}}).
+2. If the user asks about 'Today': Subtract today's specific spending from that fixed Daily Limit.
+3. Use the contextual data to answer the user's query relative to their fixed spending goals.
 
 ## Output Format:
 - One short explanation paragraph.

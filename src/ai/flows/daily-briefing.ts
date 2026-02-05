@@ -67,19 +67,18 @@ const prompt = ai.definePrompt({
 
             ## Strict Rules:
             1. Use ONLY real data. No assumptions.
-            2. Remaining Disposable = Income - Essential Logged - Discretionary Logged - Savings Goal.
-            3. Safe Daily Limit = Remaining Disposable / Days Remaining.
-            4. If Remaining Disposable <= 0, Safe Daily Limit is ₹0.
+            2. Daily Limit = ₹{{dailySpendingLimit}} (This is the fixed limit set by the user).
+            3. Remaining for Today = Daily Limit - Today's Spending.
 
             ## Task:
             1. **Summarize Today**: State specifically what was spent today and in which categories.
-            2. **Calculate Status**: Use the formula above to determine the real safe daily limit.
+            2. **Compare with Limit**: Inform the user how today's spending (₹{{todaysSpending}}) compares to their fixed Daily Limit (₹{{dailySpendingLimit}}).
             3. **Behavioral Insight**: Briefly mention if today's {{dayOfWeek}} spending is higher or lower than their typical {{dayOfWeek}} history.
-            4. **Explain Context**: In the reasoning, show the numbers: "Income (₹{{income}}) - Expenses Logged - Savings Goal leaves ₹X for the rest of the month."
+            4. **Explain Status**: In the reasoning, focus on why they are under or over their fixed daily limit today.
 
             ## Output Format:
-            - mainMessage: Concise status of today vs the calculated Safe Daily Limit.
-            - reasoning: 2-3 sentences explaining the formula result and today's impact. Use numbers clearly.
+            - mainMessage: Concise status of today vs the fixed Daily Limit.
+            - reasoning: 2-3 sentences explaining today's impact relative to the fixed daily limit. Use numbers clearly.
             - behaviorNudge: Pattern-based insight for {{dayOfWeek}}.
 
             All amounts in Indian Rupees (₹). No motivational talk.`,
@@ -92,28 +91,20 @@ const dailyBriefingFlow = ai.defineFlow(
         outputSchema: DailyBriefingOutputSchema,
     },
     async (input) => {
-        const calculateSafeLimitForToday = (inp: typeof input) => {
-            // 1. Calculate how much is actually left for the rest of the month (Dynamic Budget)
-            const remainingDisposable = inp.income - inp.essentialExpensesLogged - inp.discretionaryExpensesLogged - inp.savingsGoal;
-            const dynamicDailyLimit = Math.max(0, remainingDisposable / inp.daysLeftInMonth);
-            
-            // 2. Calculate today's remaining allowance based on the profile's Daily Limit
-            const dailyLimitRemaining = Math.max(0, inp.dailySpendingLimit - inp.todaysSpending);
-            
-            // 3. The 'Safe Limit' for TODAY is capped by your daily quota, 
-            //    but can be lower if you are overspent for the month.
-            return Math.min(dailyLimitRemaining, dynamicDailyLimit);
+        const calculateRemainingForToday = (inp: typeof input) => {
+            // Simply use the fixed limit minus what they already spent today
+            return Math.max(-999999, inp.dailySpendingLimit - inp.todaysSpending);
         };
 
         try {
-            const spendableToday = calculateSafeLimitForToday(input);
+            const spendableToday = calculateRemainingForToday(input);
 
             const { output } = await prompt(input);
             if (!output) {
                 return {
                     spendableToday,
-                    mainMessage: spendableToday > 0 
-                        ? `You have ₹${spendableToday.toFixed(0)} left for today.` 
+                    mainMessage: spendableToday > 0
+                        ? `You have ₹${spendableToday.toFixed(0)} left for today.`
                         : `You've reached your limit for today.`,
                     reasoning: `Based on your daily limit of ₹${input.dailySpendingLimit}.`,
                 };
@@ -121,16 +112,16 @@ const dailyBriefingFlow = ai.defineFlow(
 
             return {
                 ...output,
-                spendableToday, 
+                spendableToday,
             };
         } catch (error) {
             console.error('Error in dailyBriefingFlow:', error);
-            const spendableToday = calculateSafeLimitForToday(input);
+            const spendableToday = calculateRemainingForToday(input);
             return {
                 spendableToday,
-                mainMessage: spendableToday > 0 
-                  ? `You have ₹${spendableToday.toFixed(0)} left for today.` 
-                  : `You've reached your limit for today.`,
+                mainMessage: spendableToday > 0
+                    ? `You have ₹${spendableToday.toFixed(0)} left for today.`
+                    : `You've reached your limit for today.`,
                 reasoning: `Based on your daily limit of ₹${input.dailySpendingLimit}.`,
             };
         }
