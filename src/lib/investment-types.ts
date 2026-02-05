@@ -10,14 +10,14 @@ export interface Investment {
   purchaseAmount: number; // Original investment amount
   currentValue: number; // Current market value
   purchaseDate: string; // ISO string
-  quantity?: number; // For stocks, crypto, etc.
-  currentPrice?: number; // Current price per unit
+  quantity?: number | null; // For stocks, crypto, etc.
+  currentPrice?: number | null; // Current price per unit
   status: InvestmentStatus;
-  notes?: string;
-  symbol?: string; // Stock ticker or fund code
-  lastPriceFetchedAt?: string; // ISO string
-  priceSource?: string; // e.g. 'Yahoo Finance'
-  quoteError?: string; // Error message if price fetch failed
+  notes?: string | null;
+  symbol?: string | null; // Stock ticker or fund code
+  lastPriceFetchedAt?: string | null; // ISO string
+  priceSource?: string | null; // e.g. 'Yahoo Finance'
+  quoteError?: string | null; // Error message if price fetch failed
 }
 
 export interface SIPPlan {

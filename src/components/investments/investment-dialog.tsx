@@ -39,9 +39,9 @@ export default function InvestmentDialog({ open, onOpenChange, onSave }: Investm
       currentValue: currentValue || purchaseAmount,
       purchaseDate,
       status: 'Active' as InvestmentStatus,
-      notes,
-      symbol: (type === 'Stock' || type === 'Mutual Fund') ? symbol : undefined,
-      quantity: (type === 'Stock' || type === 'Cryptocurrency') ? quantity : undefined,
+      notes: notes || null,
+      symbol: (type === 'Stock' || type === 'Mutual Fund' || type === 'Cryptocurrency') && symbol ? symbol : null,
+      quantity: (type === 'Stock' || type === 'Cryptocurrency' || type === 'Mutual Fund') ? quantity : null,
     };
 
     onSave(investment);
@@ -105,7 +105,7 @@ export default function InvestmentDialog({ open, onOpenChange, onSave }: Investm
             )}
           </div>
 
-          {(type === 'Stock' || type === 'Cryptocurrency') && (
+          {(type === 'Stock' || type === 'Cryptocurrency' || type === 'Mutual Fund') && (
             <div className="space-y-2">
               <Label htmlFor="quantity">Quantity / Units</Label>
               <Input
@@ -122,7 +122,9 @@ export default function InvestmentDialog({ open, onOpenChange, onSave }: Investm
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="purchaseAmount">Purchase Amount (₹)</Label>
+              <Label htmlFor="purchaseAmount">
+                {(type === 'Stock' || type === 'Mutual Fund') ? 'Total Investment (₹)' : 'Purchase Amount (₹)'}
+              </Label>
               <Input
                 id="purchaseAmount"
                 type="number"
@@ -132,16 +134,18 @@ export default function InvestmentDialog({ open, onOpenChange, onSave }: Investm
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="currentValue">Current Value (₹)</Label>
-              <Input
-                id="currentValue"
-                type="number"
-                placeholder="0"
-                value={currentValue || ''}
-                onChange={(e) => setCurrentValue(Number(e.target.value))}
-              />
-            </div>
+            {type !== 'Stock' && type !== 'Mutual Fund' && type !== 'Cryptocurrency' && (
+              <div className="space-y-2">
+                <Label htmlFor="currentValue">Current Value (₹)</Label>
+                <Input
+                  id="currentValue"
+                  type="number"
+                  placeholder="0"
+                  value={currentValue || ''}
+                  onChange={(e) => setCurrentValue(Number(e.target.value))}
+                />
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

@@ -21,6 +21,22 @@ const COLLECTIONS = {
   LOGGED_PAYMENTS: 'logged-payments'
 } as const;
 
+function cleanData(data: any): any {
+  if (data === null || data === undefined) return null;
+  if (Array.isArray(data)) return data.map(cleanData);
+  if (typeof data === 'object') {
+    const cleaned: any = {};
+    Object.keys(data).forEach(key => {
+      const val = cleanData(data[key]);
+      if (val !== undefined) {
+        cleaned[key] = val;
+      }
+    });
+    return cleaned;
+  }
+  return data;
+}
+
 export class FirestoreService {
   /**
    * Profile Methods
@@ -28,7 +44,7 @@ export class FirestoreService {
   static async saveProfile(userId: string, profile: UserProfile): Promise<void> {
     try {
       // Store profile under users/{userId}/profile/main
-      await setDoc(doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.PROFILE, 'main'), profile);
+      await setDoc(doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.PROFILE, 'main'), cleanData(profile));
     } catch (error) {
       console.error('Error saving profile:', error);
       throw error;
@@ -52,7 +68,7 @@ export class FirestoreService {
   static async updateProfile(userId: string, updates: UserProfile): Promise<void> {
     try {
       const docRef = doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.PROFILE, 'main');
-      await setDoc(docRef, updates);
+      await setDoc(docRef, cleanData(updates));
     } catch (error) {
       console.error('Error updating profile:', error);
       throw error;
@@ -66,7 +82,7 @@ export class FirestoreService {
     try {
       await setDoc(
         doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.GOALS, goal.id),
-        goal
+        cleanData(goal)
       );
     } catch (error) {
       console.error('Error saving goal:', error);
@@ -102,7 +118,7 @@ export class FirestoreService {
     try {
       await setDoc(
         doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.TRANSACTIONS, transaction.id),
-        transaction
+        cleanData(transaction)
       );
     } catch (error) {
       console.error('Error saving transaction:', error);
@@ -138,7 +154,7 @@ export class FirestoreService {
     try {
       await setDoc(
         doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.FIXED_EXPENSES, expense.id),
-        expense
+        cleanData(expense)
       );
     } catch (error) {
       console.error('Error saving fixed expense:', error);
@@ -172,7 +188,7 @@ export class FirestoreService {
    */
   static async saveLoggedPayments(userId: string, payments: any): Promise<void> {
     try {
-      await setDoc(doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.LOGGED_PAYMENTS, 'main'), { payments });
+      await setDoc(doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.LOGGED_PAYMENTS, 'main'), cleanData({ payments }));
     } catch (error) {
       console.error('Error saving logged payments:', error);
       throw error;

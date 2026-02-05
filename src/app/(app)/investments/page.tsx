@@ -53,29 +53,29 @@ export default function InvestmentsPage() {
   const investments = profile?.investments || [];
   const sipPlans = profile?.sipPlans || [];
 
-  // Get stock investments
-  const stockInvestments = useMemo(() =>
-    investments.filter(inv => inv.type === 'Stock' && inv.symbol),
+  // Get refreshable investments (Stocks, Mutual Funds, Crypto with symbols)
+  const refreshableInvestments = useMemo(() =>
+    investments.filter(inv => (inv.type === 'Stock' || inv.type === 'Mutual Fund' || inv.type === 'Cryptocurrency') && inv.symbol),
     [investments]
   );
 
   // Check if any stock is stale
   const hasStaleStocks = useMemo(() => {
-    if (stockInvestments.length === 0) return false;
+    if (refreshableInvestments.length === 0) return false;
     const now = Date.now();
-    return stockInvestments.some(inv => {
+    return refreshableInvestments.some((inv: Investment) => {
       if (!inv.lastPriceFetchedAt) return true;
       const lastFetch = new Date(inv.lastPriceFetchedAt).getTime();
       return (now - lastFetch) > STALE_THRESHOLD_MS;
     });
-  }, [stockInvestments]);
+  }, [refreshableInvestments]);
 
   // Refresh stock prices
   const refreshPrices = useCallback(async () => {
-    if (stockInvestments.length === 0) {
+    if (refreshableInvestments.length === 0) {
       toast({
-        title: 'No stocks to refresh',
-        description: 'Add stock investments with ticker symbols to enable price refresh.',
+        title: 'No investments to refresh',
+        description: 'Add investments with ticker symbols or fund codes to enable price refresh.',
       });
       return;
     }
@@ -83,7 +83,7 @@ export default function InvestmentsPage() {
     setIsRefreshing(true);
 
     try {
-      const symbols = [...new Set(stockInvestments.map(inv => inv.symbol!))];
+      const symbols = [...new Set(refreshableInvestments.map((inv: Investment) => inv.symbol!))];
       const response = await fetch(`/api/quotes?symbols=${symbols.join(',')}`);
 
       if (!response.ok) {
@@ -98,10 +98,13 @@ export default function InvestmentsPage() {
       let successCount = 0;
       let errorCount = 0;
 
-      const updatedInvestments = investments.map(inv => {
-        if (inv.type !== 'Stock' || !inv.symbol) return inv;
+      const updatedInvestments: Investment[] = investments.map(inv => {
+        const symbol = inv.symbol;
+        const isRefreshable = (inv.type === 'Stock' || inv.type === 'Mutual Fund' || inv.type === 'Cryptocurrency') && symbol;
 
-        const quote = quoteMap.get(inv.symbol.toUpperCase());
+        if (!isRefreshable || !symbol) return inv;
+
+        const quote = quoteMap.get(symbol.toUpperCase());
         if (!quote) return inv;
 
         if (quote.error) {
@@ -119,7 +122,7 @@ export default function InvestmentsPage() {
             currentValue: priceInINR * inv.quantity,
             lastPriceFetchedAt: now,
             priceSource: data.source,
-            quoteError: undefined,
+            quoteError: null,
           };
         }
 
@@ -136,7 +139,7 @@ export default function InvestmentsPage() {
       } else {
         toast({
           title: 'Partial update',
-          description: `Updated ${successCount}/${stockInvestments.length} holdings. ${errorCount} failed.`,
+          description: `Updated ${successCount}/${refreshableInvestments.length} holdings. ${errorCount} failed.`,
           variant: 'destructive',
         });
       }
@@ -150,7 +153,7 @@ export default function InvestmentsPage() {
     } finally {
       setIsRefreshing(false);
     }
-  }, [stockInvestments, investments, updateInvestments, toast]);
+  }, [refreshableInvestments, investments, updateInvestments, toast]);
 
   // Auto-refresh on mount if stale
   useEffect(() => {
@@ -201,7 +204,7 @@ export default function InvestmentsPage() {
           <p className="text-muted-foreground">Track and grow your portfolio with AI-powered insights</p>
         </div>
         <div className="flex gap-2">
-          {stockInvestments.length > 0 && (
+          {refreshableInvestments.length > 0 && (
             <Button
               variant="outline"
               onClick={refreshPrices}
