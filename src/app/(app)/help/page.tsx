@@ -141,7 +141,7 @@ export default function HelpPage() {
                               {subsection.description}
                             </p>
                           )}
-                          
+
                           {/* Steps */}
                           {subsection.steps && subsection.steps.length > 0 && (
                             <div className="space-y-2">

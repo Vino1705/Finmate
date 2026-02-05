@@ -850,18 +850,40 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     // Check eligibility
     const newBadges = checkBadgeEligibility(context);
 
-    // Award new badges
-    for (const badgeId of newBadges) {
-      await awardBadge(badgeId);
+    // Update last check date
+    const updatedGamification = {
+      ...profile.gamification,
+      lastBadgeCheckDate: formatISO(new Date()),
+    };
+
+    const updatedProfile: UserProfile = {
+      ...profile,
+      gamification: updatedGamification,
+    };
+
+    if (newBadges.length > 0) {
+      // Award new badges
+      for (const badgeId of newBadges) {
+        await awardBadge(badgeId);
+      }
+    } else {
+      // Just update the check date
+      await FirestoreService.updateProfile(user.uid, updatedProfile);
+      setProfile(updatedProfile);
     }
   }, [profile, user, transactions, goals, getCurrentStreak, getCumulativeDailySavings, getTodaysSpending]);
 
-  // Auto-check badges when transactions change
+  // Check badges only when a new day starts or on initial load
   useEffect(() => {
-    if (profile && transactions.length > 0) {
-      checkAndAwardBadges();
+    if (profile && user && authLoaded) {
+      const lastCheck = profile.gamification?.lastBadgeCheckDate;
+      const today = startOfDay(new Date());
+
+      if (!lastCheck || isBefore(parseISO(lastCheck), today)) {
+        checkAndAwardBadges();
+      }
     }
-  }, [transactions.length, profile?.gamification?.earnedBadges?.length]);
+  }, [profile?.id, authLoaded]);
 
   const value: AppContextType = {
     user,

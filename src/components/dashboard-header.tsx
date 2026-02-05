@@ -29,16 +29,16 @@ export function DashboardHeader() {
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 lg:px-8">
       <SidebarTrigger className="md:hidden" />
-      <h1 className="flex-1 text-xl font-semibold tracking-tight">{title}</h1>
-      <div className="flex items-center gap-4 mr-2">
+      <div className="flex-1">
+        <span className="text-lg font-semibold tracking-tight">
+          Hello, <span className="text-primary">{firstName}</span>
+        </span>
+      </div>
+      <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <ExportReport />
           <PdfExport />
         </div>
-        <div className="h-8 w-px bg-border mx-2 hidden md:block" />
-        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-          Hello, <span className="text-foreground">{firstName}</span>
-        </span>
       </div>
     </header>
   );

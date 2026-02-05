@@ -34,7 +34,7 @@ type FundActionValues = z.infer<typeof fundActionSchema>;
 function FundActionDialog({ type, children }: { type: 'deposit' | 'withdraw', children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const { updateEmergencyFund } = useApp();
-  
+
   const form = useForm<FundActionValues>({
     resolver: zodResolver(fundActionSchema),
     defaultValues: { amount: 1000, notes: '' },
@@ -101,12 +101,12 @@ function SetTargetDialog() {
     setEmergencyFundTarget(target);
     setOpen(false);
   };
-  
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon" className="h-6 w-6">
-            <Pencil className="h-4 w-4" />
+          <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -115,8 +115,8 @@ function SetTargetDialog() {
           <DialogDescription>Your target should ideally cover 3-6 months of essential living expenses.</DialogDescription>
         </DialogHeader>
         <div className="py-4 space-y-2">
-            <Label>Target Amount (₹)</Label>
-            <Input type="number" value={target} onChange={(e) => setTarget(Number(e.target.value))} />
+          <Label>Target Amount (₹)</Label>
+          <Input type="number" value={target} onChange={(e) => setTarget(Number(e.target.value))} />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
@@ -132,8 +132,8 @@ export default function EmergencyFundPage() {
 
   const emergencyFund = profile?.emergencyFund;
   const progress = emergencyFund && emergencyFund.target > 0 ? (emergencyFund.current / emergencyFund.target) * 100 : 0;
-  const sortedHistory = emergencyFund?.history.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  
+  const sortedHistory = emergencyFund?.history.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   if (!emergencyFund) {
     return (
       <div className="text-center">
@@ -152,7 +152,7 @@ export default function EmergencyFundPage() {
       {/* Header with action buttons */}
       <div className="w-full flex items-center justify-between gap-4">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <ShieldAlert className="h-6 w-6 text-[#4ADE80]"/>
+          <ShieldAlert className="h-6 w-6 text-[#4ADE80]" />
           Emergency Fund
         </h1>
         <div className="flex gap-2">
@@ -210,51 +210,51 @@ export default function EmergencyFundPage() {
         {/* Visual Progress Card */}
         <Card className="flex-1 relative">
           <CardHeader>
-              <div className="flex justify-between items-center">
-                  <CardTitle className="flex items-center gap-2">
-                      Fund Progress
-                  </CardTitle>
-                  <div className="text-right">
-                      <p className="text-2xl font-bold">₹{emergencyFund.current.toFixed(2)}</p>
-                      <div className="text-sm text-muted-foreground flex items-center justify-end gap-1">
-                          <span>Target: ₹{emergencyFund.target.toFixed(2)}</span>
-                          <SetTargetDialog />
-                      </div>
-                  </div>
+            <div className="flex justify-between items-center">
+              <CardTitle className="flex items-center gap-2">
+                Fund Progress
+              </CardTitle>
+              <div className="text-right">
+                <p className="text-2xl font-bold">₹{emergencyFund.current.toFixed(2)}</p>
+                <div className="text-sm text-muted-foreground flex items-center justify-end gap-1">
+                  <span>Target: ₹{emergencyFund.target.toFixed(2)}</span>
+                  <SetTargetDialog />
+                </div>
               </div>
+            </div>
           </CardHeader>
           <CardContent className="flex flex-col items-center py-8">
-               <div className="relative w-64 h-64 mb-8">
-                 <div className="absolute inset-0 flex items-center justify-center">
-                   <svg className="w-full h-full -rotate-90">
-                     <circle
-                       cx="128"
-                       cy="128"
-                       r="116"
-                       className="stroke-current text-muted stroke-[12px] fill-none"
-                     />
-                     <circle
-                       cx="128"
-                       cy="128"
-                       r="116"
-                       className="stroke-[#4ADE80] stroke-[12px] fill-none transition-all duration-500 ease-out"
-                       strokeDasharray={`${progress * 7.28} 728`}
-                     />
-                   </svg>
-                   <div className="absolute flex flex-col items-center">
-                     <div className="text-4xl font-bold mb-2">{progress.toFixed(1)}%</div>
-                     <div className="text-sm text-muted-foreground">of target</div>
-                   </div>
-                 </div>
-               </div>
-               <div className="w-full space-y-4">
-                 <Progress value={progress} className="h-4 w-full" />
-                 <p className="text-center text-sm text-muted-foreground">
-                   {progress >= 100 ? 'Target achieved! Consider increasing your target.' :
-                    progress >= 50 ? 'Over halfway there! Keep going!' :
+            <div className="relative w-64 h-64 mb-8">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg className="w-full h-full -rotate-90">
+                  <circle
+                    cx="128"
+                    cy="128"
+                    r="116"
+                    className="stroke-current text-muted stroke-[12px] fill-none"
+                  />
+                  <circle
+                    cx="128"
+                    cy="128"
+                    r="116"
+                    className="stroke-[#4ADE80] stroke-[12px] fill-none transition-all duration-500 ease-out"
+                    strokeDasharray={`${progress * 7.28} 728`}
+                  />
+                </svg>
+                <div className="absolute flex flex-col items-center">
+                  <div className="text-4xl font-bold mb-2">{progress.toFixed(1)}%</div>
+                  <div className="text-sm text-muted-foreground">of target</div>
+                </div>
+              </div>
+            </div>
+            <div className="w-full space-y-4">
+              <Progress value={progress} className="h-4 w-full" />
+              <p className="text-center text-sm text-muted-foreground">
+                {progress >= 100 ? 'Target achieved! Consider increasing your target.' :
+                  progress >= 50 ? 'Over halfway there! Keep going!' :
                     'Building your safety net steadily.'}
-                 </p>
-               </div>
+              </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -277,7 +277,7 @@ export default function EmergencyFundPage() {
                   <div className="h-full bg-[#4ADE80]" style={{ width: `${Math.min(100, progress)}%` }} />
                 </div>
               </div>
-              
+
               <div className="p-5 rounded-lg bg-black/10">
                 <div className="flex justify-between items-center mb-2">
                   <span>Monthly Contributions</span>
@@ -287,7 +287,7 @@ export default function EmergencyFundPage() {
                   {monthlyAdditions > 0 ? `Added ₹${monthlyAdditions} this month` : 'Start your monthly deposits'}
                 </div>
               </div>
-              
+
               <div className="p-5 rounded-lg bg-black/10">
                 <div className="flex justify-between items-center mb-2">
                   <span>Withdrawal Frequency</span>
@@ -332,19 +332,19 @@ export default function EmergencyFundPage() {
                     </div>
                     <div className="mt-4 space-y-2">
                       <div className="w-full bg-black/20 h-2 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#4ADE80] transition-all duration-500" 
-                             style={{ width: `${Math.min(100, (progress/25)*100)}%` }} />
+                        <div className="h-full bg-[#4ADE80] transition-all duration-500"
+                          style={{ width: `${Math.min(100, (progress / 25) * 100)}%` }} />
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {progress >= 25 
-                          ? '🎉 Achieved! You can now handle basic emergencies.' 
+                        {progress >= 25
+                          ? '🎉 Achieved! You can now handle basic emergencies.'
                           : `₹${((0.25 * emergencyFund.target) - emergencyFund.current).toFixed(0)} more needed for basic safety`}
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               {/* Stable Foundation */}
               <div className={`p-5 rounded-lg ${progress >= 50 ? 'bg-[#4ADE80]/10' : 'bg-black/10'} transition-all duration-300 hover:scale-[1.02] cursor-pointer`}>
                 <div className="flex items-center gap-4">
@@ -366,19 +366,19 @@ export default function EmergencyFundPage() {
                     </div>
                     <div className="mt-4 space-y-2">
                       <div className="w-full bg-black/20 h-2 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#4ADE80] transition-all duration-500" 
-                             style={{ width: `${Math.min(100, (progress/50)*100)}%` }} />
+                        <div className="h-full bg-[#4ADE80] transition-all duration-500"
+                          style={{ width: `${Math.min(100, (progress / 50) * 100)}%` }} />
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {progress >= 50 
-                          ? '💪 Great work! You have a solid financial foundation.' 
+                        {progress >= 50
+                          ? '💪 Great work! You have a solid financial foundation.'
                           : `₹${((0.5 * emergencyFund.target) - emergencyFund.current).toFixed(0)} more for increased stability`}
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               {/* Financial Freedom */}
               <div className={`p-5 rounded-lg ${progress >= 100 ? 'bg-[#4ADE80]/10' : 'bg-black/10'} transition-all duration-300 hover:scale-[1.02] cursor-pointer`}>
                 <div className="flex items-center gap-4">
@@ -400,12 +400,12 @@ export default function EmergencyFundPage() {
                     </div>
                     <div className="mt-4 space-y-2">
                       <div className="w-full bg-black/20 h-2 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#4ADE80] transition-all duration-500" 
-                             style={{ width: `${Math.min(100, progress)}%` }} />
+                        <div className="h-full bg-[#4ADE80] transition-all duration-500"
+                          style={{ width: `${Math.min(100, progress)}%` }} />
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {progress >= 100 
-                          ? '🌟 Maximum security achieved! Consider increasing your target.' 
+                        {progress >= 100
+                          ? '🌟 Maximum security achieved! Consider increasing your target.'
                           : `₹${(emergencyFund.target - emergencyFund.current).toFixed(0)} away from total freedom`}
                       </p>
                     </div>
@@ -419,46 +419,46 @@ export default function EmergencyFundPage() {
         {/* Transaction History - Now Full Width */}
         <Card className="md:col-span-2 xl:col-span-3">
           <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                  <History className="h-5 w-5" />
-                  Transaction History
-              </CardTitle>
-              <CardDescription>A log of all deposits and withdrawals from your fund.</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Transaction History
+            </CardTitle>
+            <CardDescription>A log of all deposits and withdrawals from your fund.</CardDescription>
           </CardHeader>
           <CardContent>
-               <ScrollArea className="h-[400px] pr-4">
-                  <div className="space-y-4">
-                  {sortedHistory && sortedHistory.length > 0 ? (
-                      sortedHistory.map((entry) => (
-                      <div key={entry.id} className="flex justify-between items-center rounded-md border p-4">
-                          <div className="flex items-center gap-4">
-                               {entry.type === 'deposit' ? <TrendingUp className="h-6 w-6 text-green-500" /> : <TrendingDown className="h-6 w-6 text-destructive" />}
-                              <div>
-                                  <p className={`font-semibold ${entry.type === 'deposit' ? 'text-green-500' : 'text-destructive'}`}>
-                                      {entry.type === 'deposit' ? '+' : '-'} ₹{entry.amount.toFixed(2)}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                      {format(new Date(entry.date), 'PPP p')}
-                                  </p>
-                                   {entry.notes && <p className="text-sm mt-1">"{entry.notes}"</p>}
-                              </div>
-                          </div>
-                          <div className={`text-sm font-semibold capitalize px-3 py-1 rounded-full ${entry.type === 'deposit' ? 'bg-green-500/10 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
-                              {entry.type}
-                          </div>
-                      </div>
-                      ))
-                  ) : (
-                      <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-20 text-center">
-                          <PiggyBank className="h-12 w-12 text-muted-foreground" />
-                          <h2 className="mt-4 text-xl font-semibold">No History Yet</h2>
-                          <p className="mt-2 text-sm text-muted-foreground">
-                          Make your first deposit to start building your safety net.
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="space-y-4">
+                {sortedHistory && sortedHistory.length > 0 ? (
+                  sortedHistory.map((entry) => (
+                    <div key={entry.id} className="flex justify-between items-center rounded-md border p-4">
+                      <div className="flex items-center gap-4">
+                        {entry.type === 'deposit' ? <TrendingUp className="h-6 w-6 text-green-500" /> : <TrendingDown className="h-6 w-6 text-destructive" />}
+                        <div>
+                          <p className={`font-semibold ${entry.type === 'deposit' ? 'text-green-500' : 'text-destructive'}`}>
+                            {entry.type === 'deposit' ? '+' : '-'} ₹{entry.amount.toFixed(2)}
                           </p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(entry.date), 'PPP p')}
+                          </p>
+                          {entry.notes && <p className="text-sm mt-1">"{entry.notes}"</p>}
+                        </div>
                       </div>
-                  )}
+                      <div className={`text-sm font-semibold capitalize px-3 py-1 rounded-full ${entry.type === 'deposit' ? 'bg-green-500/10 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        {entry.type}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-20 text-center">
+                    <PiggyBank className="h-12 w-12 text-muted-foreground" />
+                    <h2 className="mt-4 text-xl font-semibold">No History Yet</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Make your first deposit to start building your safety net.
+                    </p>
                   </div>
-              </ScrollArea>
+                )}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>

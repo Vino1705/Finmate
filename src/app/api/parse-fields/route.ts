@@ -17,12 +17,12 @@ export async function POST(request: Request) {
     }
 
     // --- API keys and model setup ---
-    const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY1;
     const project = process.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT;
 
     if (!apiKey || !project) {
       return NextResponse.json(
-        { error: 'Missing API key or project id: set GOOGLE_API_KEY or GEMINI_API_KEY and GOOGLE_PROJECT_ID in server env' },
+        { error: 'Missing API key or project id: set GOOGLE_API_KEY or GEMINI_API_KEY1 and GOOGLE_PROJECT_ID in server env' },
         { status: 500 }
       );
     }

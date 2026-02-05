@@ -98,9 +98,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h2 className="text-3xl font-bold tracking-tight">
-          {profile?.name ? `Hello, ${profile.name.split(' ')[0]}!` : 'Welcome back!'}
-        </h2>
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
       </div>
 
       <SmartDailyBriefing />
