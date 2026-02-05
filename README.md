@@ -66,7 +66,7 @@ FinMate is a **role‑based, AI‑powered personal finance management platform**
 ---
 
 ## 📊 3. Dashboard (Financial Overview)
-<img width="1671" height="952" alt="Screenshot 2026-01-19 at 14 45 25" src="https://github.com/user-attachments/assets/60f22564-b3d9-4da4-bc44-47e60b843c21" />
+<img width="1896" height="1088" alt="image" src="https://github.com/user-attachments/assets/781d6b77-7707-4673-88c0-ca9c9e062b74" />
 
 
 
@@ -87,7 +87,7 @@ FinMate is a **role‑based, AI‑powered personal finance management platform**
 ---
 
 ## 📝 4. Daily Check‑In (Expense Logging)
-<img width="1267" height="936" alt="Screenshot 2026-01-19 at 14 41 36" src="https://github.com/user-attachments/assets/b19fa77d-44f8-4eca-b402-ad3b882c58f1" />
+<img width="1899" height="1070" alt="image" src="https://github.com/user-attachments/assets/9793bf47-df3a-4d85-89b2-61212a46815d" />
 
 
 
@@ -107,7 +107,7 @@ FinMate is a **role‑based, AI‑powered personal finance management platform**
 
 ## 📒 5. Expenses Analysis
 
-<img width="1663" height="932" alt="Screenshot 2026-01-19 at 14 42 23" src="https://github.com/user-attachments/assets/f1750da1-b363-4e0b-ba37-02a1e43e64be" />
+<img width="1900" height="1065" alt="image" src="https://github.com/user-attachments/assets/3ddd1a3b-c77c-4ad0-8512-ab0841deaf88" />
 
 
 ### Features
@@ -120,7 +120,7 @@ FinMate is a **role‑based, AI‑powered personal finance management platform**
 ---
 
 ## 📅 6. Fixed Expenses Management
-<img width="1393" height="938" alt="Screenshot 2026-01-19 at 14 42 52" src="https://github.com/user-attachments/assets/fbb87574-afd8-4c50-b257-0162ae63af3f" />
+<img width="1897" height="1090" alt="image" src="https://github.com/user-attachments/assets/860402ab-5bbc-4c73-bd1c-15169ce05070" />
 
 
 
@@ -136,7 +136,7 @@ FinMate is a **role‑based, AI‑powered personal finance management platform**
 
 ## 🎯 7. Goals Management
 
-<img width="1641" height="940" alt="Screenshot 2026-01-19 at 14 41 54" src="https://github.com/user-attachments/assets/2f189218-5378-45e9-ad99-dde3f07dba25" />
+<img width="1897" height="1081" alt="image" src="https://github.com/user-attachments/assets/ce28c137-0562-4ee3-b631-ce2507ab1f1e" />
 
 
 ### Goal Features
@@ -151,7 +151,7 @@ FinMate is a **role‑based, AI‑powered personal finance management platform**
 
 ## 🛡️ 8. Emergency Fund
 
-<img width="1351" height="940" alt="Screenshot 2026-01-19 at 14 43 06" src="https://github.com/user-attachments/assets/efc2cdf4-6372-4372-a300-bec29edfa0c8" />
+<img width="1910" height="1092" alt="image" src="https://github.com/user-attachments/assets/8444a97a-20cb-43ad-b28d-8bc997563d85" />
 
 
 * Dedicated emergency savings pool
@@ -162,7 +162,7 @@ FinMate is a **role‑based, AI‑powered personal finance management platform**
 ---
 
 ## 🤖 9. AI & Automation
-<img width="1627" height="691" alt="Screenshot 2026-01-19 at 15 08 41" src="https://github.com/user-attachments/assets/25392cfd-f9c0-4b67-b858-4f27ffa6e70f" />
+<img width="249" height="350" alt="image" src="https://github.com/user-attachments/assets/4e2032da-c159-4bce-a9b1-a813262708f9" />
 
 ### AI Capabilities
 
@@ -176,7 +176,7 @@ FinMate is a **role‑based, AI‑powered personal finance management platform**
 
 ## 🎮 10. Gamification System
 
-<img width="1637" height="941" alt="Screenshot 2026-01-19 at 14 43 19" src="https://github.com/user-attachments/assets/407cfdba-4851-4a8a-88cb-92246f1ab3d7" />
+<img width="1897" height="1098" alt="image" src="https://github.com/user-attachments/assets/7246dc94-d1cc-49d0-8694-ee63776b5d6b" />
 
 
 ### Streak Counter
@@ -199,7 +199,7 @@ FinMate is a **role‑based, AI‑powered personal finance management platform**
 ---
 
 ## 📊 11. Dashboard Enhancements
-<img width="1654" height="938" alt="Screenshot 2026-01-19 at 14 41 22" src="https://github.com/user-attachments/assets/34a02c82-67bd-4e39-aa00-d60de955c065" />
+<img width="1887" height="1089" alt="image" src="https://github.com/user-attachments/assets/cdada193-2b38-47ec-b5c1-f73f8e940a67" />
 
 
 
@@ -211,7 +211,7 @@ FinMate is a **role‑based, AI‑powered personal finance management platform**
 ---
 
 ## 💹 12. Investments & Wealth Management
-<img width="907" height="940" alt="Screenshot 2026-01-19 at 14 43 57" src="https://github.com/user-attachments/assets/470ba9ba-6b92-4eb2-9d5a-aceb1d2e941b" />
+<img width="1587" height="855" alt="image" src="https://github.com/user-attachments/assets/851399ef-1a9f-4e64-8b7c-3578c354cef8" />
 
 
 
