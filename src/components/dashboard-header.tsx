@@ -3,6 +3,7 @@
 
 import { usePathname } from 'next/navigation';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ExportReport from '@/components/export-report';
 import { PdfExport } from '@/components/pdf-export';
 import { useApp } from '@/hooks/use-app';
@@ -26,22 +27,33 @@ export function DashboardHeader() {
   // Always show the page title (e.g., "Dashboard Overview") in the header.
   // This prevents showing a duplicate greeting in the header when the page
   // content already displays a personalized greeting.
-  const firstName = profile?.name ? profile.name.split(' ')[0] : (user?.displayName ? user.displayName.split(' ')[0] : 'User');
+  const title = pageTitles[pathname] || 'FinMate';
+
+  const getInitials = (emailOrName: string | undefined) => {
+    if (!emailOrName) return 'U';
+    // If it's a name with spaces, use initials of first/last name
+    if (emailOrName.includes(' ')) {
+        const parts = emailOrName.split(' ');
+        return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    // Otherwise, use the first letter (for email or single name)
+    return emailOrName.charAt(0).toUpperCase();
+  }
+  
+  const avatarIdentifier = profile?.name || user?.displayName || user?.email || 'user';
 
   return (
-    <header className="sticky top-0 z-10 flex min-h-16 flex-col justify-center border-b bg-background px-4 md:px-6 safe-pt">
-      <div className="flex h-16 items-center gap-4 w-full">
-        <SidebarTrigger className="md:hidden" />
-        <div className="flex-1">
-          <h1 className="text-xl font-semibold tracking-tight">
-            Hello, <span className="text-primary">{firstName}</span>
-          </h1>
-        </div>
-        <div className="flex items-center gap-2 mr-3">
-          <ExportReport />
-          <PdfExport />
-        </div>
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+      <SidebarTrigger className="md:hidden" />
+      <h1 className="flex-1 text-xl font-semibold tracking-tight">{title}</h1>
+      <div className="flex items-center gap-2 mr-3">
+        <ExportReport />
+        <PdfExport />
       </div>
+      <Avatar>
+        <AvatarImage src={`https://avatar.vercel.sh/${avatarIdentifier}.png`} />
+        <AvatarFallback>{getInitials(avatarIdentifier)}</AvatarFallback>
+      </Avatar>
     </header>
   );
 }

@@ -4,18 +4,10 @@
   "java.project.sourcePaths": [],
   "java.project.referencedLibraries": [],
   "java.compile.nullAnalysis.mode": "automatic",
+  "java.import.gradle.home": null,
   "java.import.gradle.wrapper.enabled": true,
-  "java.import.exclusions": [
-    "**/node_modules/**",
-    "**/.git/**"
-  ],
   "java.project.resourceFilters": [
     "node_modules",
     ".git"
-  ],
-  "files.exclude": {
-    "**/.git": true,
-    "**/.DS_Store": true,
-    "**/node_modules": true
-  }
+  ]
 }
